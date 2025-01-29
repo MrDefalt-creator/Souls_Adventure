@@ -18,6 +18,8 @@ PLATFORM_WIDTH = 52
 PLATFORM_HEIGHT = PLATFORM_WIDTH
 PLATFORM_COLOR = "#008000"
 
+tile_sheet = image.load("Assets/Woods/oak_woods_tileset.png")
+
 class Camera(object):
     def __init__(self, camera_func, width, height):
         self.camera_func = camera_func
@@ -44,16 +46,15 @@ def camera_configure(camera, target_rect):
 class Player(sprite.Sprite):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
-        self.xvel = 0   #скорость перемещения. 0 - стоять на месте
+        self.xvel = 0   #Скорость перемещения. 0 - стоять на месте
         self.startX = x # Начальная позиция Х, пригодится когда будем переигрывать уровень
         self.startY = y
         self.yvel = 0 # скорость вертикального перемещения
         self.onGround = False # На земле ли я?
         self.image = Surface((WIDTH,HEIGHT))
         self.image.fill(Color(COLOR))
-        self.image = transform.scale(get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height), (150, 110))
         self.rect = Rect(x, y, WIDTH, HEIGHT) # прямоугольный объект
-        self.image.set_colorkey((0,0,0))
+        #self.image.set_colorkey(Color(COLOR)) # делаем фон прозрачным
         
 
     def update(self, left, right, up, platforms):
@@ -61,25 +62,21 @@ class Player(sprite.Sprite):
         if up:
             if self.onGround: # прыгаем, только когда можем оттолкнуться от земли
                 self.yvel = -JUMP_POWER
-            #self.image.fill(Color(COLOR))
+            self.image.fill(Color(COLOR))
                
                        
         if left:
             self.xvel = -MOVE_SPEED # Лево = x- n
-            self.image = transform.scale(get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, True), (150, 110))
-            self.image.set_colorkey((0,0,0))
-            #self.image.fill(Color(COLOR))
+            self.image.fill(Color(COLOR))
  
         if right:
             self.xvel = MOVE_SPEED # Право = x + n
-            self.image = transform.scale(get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, False), (150, 110))
-            self.image.set_colorkey((0,0,0))
-            #self.image.fill(Color(COLOR))
+            self.image.fill(Color(COLOR))
          
         if not(left or right): # стоим, когда нет указаний идти
             self.xvel = 0
             if not up:
-                ""#self.image.fill(Color(COLOR))
+                self.image.fill(Color(COLOR))
             
         if not self.onGround:
             self.yvel +=  GRAVITY

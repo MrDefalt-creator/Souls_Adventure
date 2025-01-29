@@ -2,6 +2,7 @@
 import pygame
 from pygame import *
 from mainclasses import *
+from menu import *
 
 # Initialize pygame
 pygame.init()
@@ -63,6 +64,10 @@ total_level_width  = len(level[0])*PLATFORM_WIDTH # Высчитываем фа�
 total_level_height = len(level)*PLATFORM_HEIGHT
 
 camera = Camera(camera_configure, total_level_width, total_level_height) 
+
+# Вызов меню перед игрой
+main_menu(screen)
+
 
 # Main loop
 
