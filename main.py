@@ -93,10 +93,11 @@ while running:
     screen.blit(BackGround3.image, BackGround3.rect)
 
     for e in entities:
-        screen.blit(e.image, camera.apply(e))
+        screen.blit(e.image, e.rect)
 
     #camera.update(hero)
     hero.update(left, right, up, platforms) # передвижение
+    screen.blit(hero.image, hero.rect)
     pygame.display.update() 
 
 pygame.quit()

@@ -4,7 +4,7 @@ import os
 
 MOVE_SPEED = 7
 WIDTH = 52
-HEIGHT = 90
+HEIGHT = 110
 COLOR =  "#008000"
 JUMP_POWER = 10
 GRAVITY = 0.35 # Сила, которая будет тянуть нас вниз
@@ -17,8 +17,6 @@ SCREEN_HEIGHT = 720
 PLATFORM_WIDTH = 52
 PLATFORM_HEIGHT = PLATFORM_WIDTH
 PLATFORM_COLOR = "#008000"
-
-tile_sheet = image.load("Assets/Woods/oak_woods_tileset.png")
 
 class Camera(object):
     def __init__(self, camera_func, width, height):
@@ -53,8 +51,9 @@ class Player(sprite.Sprite):
         self.onGround = False # На земле ли я?
         self.image = Surface((WIDTH,HEIGHT))
         self.image.fill(Color(COLOR))
+        self.image = transform.scale(get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height), (150, 110))
         self.rect = Rect(x, y, WIDTH, HEIGHT) # прямоугольный объект
-        #self.image.set_colorkey(Color(COLOR)) # делаем фон прозрачным
+        self.image.set_colorkey((0,0,0))
         
 
     def update(self, left, right, up, platforms):
@@ -62,21 +61,25 @@ class Player(sprite.Sprite):
         if up:
             if self.onGround: # прыгаем, только когда можем оттолкнуться от земли
                 self.yvel = -JUMP_POWER
-            self.image.fill(Color(COLOR))
+            #self.image.fill(Color(COLOR))
                
                        
         if left:
             self.xvel = -MOVE_SPEED # Лево = x- n
-            self.image.fill(Color(COLOR))
+            self.image = transform.scale(get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, True), (150, 110))
+            self.image.set_colorkey((0,0,0))
+            #self.image.fill(Color(COLOR))
  
         if right:
             self.xvel = MOVE_SPEED # Право = x + n
-            self.image.fill(Color(COLOR))
+            self.image = transform.scale(get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, False), (150, 110))
+            self.image.set_colorkey((0,0,0))
+            #self.image.fill(Color(COLOR))
          
         if not(left or right): # стоим, когда нет указаний идти
             self.xvel = 0
             if not up:
-                self.image.fill(Color(COLOR))
+                ""#self.image.fill(Color(COLOR))
             
         if not self.onGround:
             self.yvel +=  GRAVITY
