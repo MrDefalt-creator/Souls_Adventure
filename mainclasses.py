@@ -1,5 +1,5 @@
 from pygame import *
-from tilehandler import *
+from spritehandler import *
 import os
 
 MOVE_SPEED = 7
