@@ -28,7 +28,7 @@ up = False
 
 entities = pygame.sprite.Group() # Все объекты
 platforms = [] # то, во что мы будем врезаться или опираться
-entities.add(hero)
+entities.add()
 
 level = [
        "4",
@@ -102,7 +102,7 @@ while running:
 
     #camera.update(hero)
     hero.update(left, right, up, platforms) # передвижение
-    screen.blit(hero.image, hero.rect)
+    hero.draw(screen)
     pygame.display.update() 
 
 pygame.quit()

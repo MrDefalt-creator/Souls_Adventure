@@ -1,3 +1,4 @@
+import pygame
 from pygame import *
 from spritehandler import *
 import os
@@ -47,70 +48,82 @@ def camera_configure(camera, target_rect):
 class Player(sprite.Sprite):
     def __init__(self, x, y):
         sprite.Sprite.__init__(self)
-        self.xvel = 0  # скорость перемещения. 0 - стоять на месте
-        self.startX = x  # Начальная позиция Х, пригодится когда будем переигрывать уровень
-        self.startY = y
-        self.yvel = 0  # скорость вертикального перемещения
-        self.onGround = False  # На земле ли я?
-        self.image = Surface((WIDTH, HEIGHT))
-        self.image.fill(Color(COLOR))
-        self.image = transform.scale(get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height),(150, 110))
-        self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
+        self.xvel = 0
+        self.yvel = 0
+        self.onGround = False
+
+        # Загружаем спрайт
+        self.sprite_width = 150
+        self.sprite_height = 110
+        self.image = transform.scale(
+            get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height),
+            (self.sprite_width, self.sprite_height)
+        )
         self.image.set_colorkey((0, 0, 0))
 
-    def update(self, left, right, up, platforms):
+        # Создаем хитбокс (уменьшим его, чтобы он совпадал с ногами персонажа)
+        self.hitbox_width = 50
+        self.hitbox_height = 90  # Подкорректируйте, если нужно
+        self.rect = Rect(x, y, self.hitbox_width, self.hitbox_height)
 
-        if up:
-            if self.onGround:  # прыгаем, только когда можем оттолкнуться от земли
-                self.yvel = -JUMP_POWER
-            # self.image.fill(Color(COLOR))
+    def update(self, left, right, up, platforms):
+        if up and self.onGround:
+            self.yvel = -JUMP_POWER
 
         if left:
-            self.xvel = -MOVE_SPEED  # Лево = x- n
-            self.image = transform.scale(get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, True), (150, 110))
+            self.xvel = -MOVE_SPEED
+            self.image = transform.scale(
+                get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, True),
+                (self.sprite_width, self.sprite_height)
+            )
             self.image.set_colorkey((0, 0, 0))
-            # self.image.fill(Color(COLOR))
 
         if right:
-            self.xvel = MOVE_SPEED  # Право = x + n
+            self.xvel = MOVE_SPEED
             self.image = transform.scale(
-                get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, False), (150, 110))
+                get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, False),
+                (self.sprite_width, self.sprite_height)
+            )
             self.image.set_colorkey((0, 0, 0))
-            # self.image.fill(Color(COLOR))
 
-        if not (left or right):  # стоим, когда нет указаний идти
+        if not (left or right):
             self.xvel = 0
-            if not up:
-                ""  # self.image.fill(Color(COLOR))
 
         if not self.onGround:
             self.yvel += GRAVITY
 
-        self.onGround = False;  # Мы не знаем, когда мы на земле((
+        self.onGround = False
         self.rect.y += self.yvel
         self.collide(0, self.yvel, platforms)
 
-        self.rect.x += self.xvel  # переносим свои положение на xvel
+        self.rect.x += self.xvel
         self.collide(self.xvel, 0, platforms)
 
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
-            if sprite.collide_rect(self, p):  # если есть пересечение платформы с игроком
+            if sprite.collide_rect(self, p):
+                if xvel > 0:
+                    self.rect.right = p.rect.left
+                if xvel < 0:
+                    self.rect.left = p.rect.right
+                if yvel > 0:
+                    self.rect.bottom = p.rect.top
+                    self.onGround = True
+                    self.yvel = 0
+                if yvel < 0:
+                    self.rect.top = p.rect.bottom
+                    self.yvel = 0
 
-                if xvel > 0:  # если движется вправо
-                    self.rect.right = p.rect.left  # то не движется вправо
+    def draw(self, screen):
+        # Рисуем хитбокс (для отладки)
+        pygame.draw.rect(screen, (0, 255, 0), self.rect, 2)  # Зеленый контур хитбокса
 
-                if xvel < 0:  # если движется влево
-                    self.rect.left = p.rect.right  # то не движется влево
+        # Смещаем спрайт так, чтобы он находился над хитбоксом
+        sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2
+        sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height)
 
-                if yvel > 0:  # если падает вниз
-                    self.rect.bottom = p.rect.top  # то не падает вниз
-                    self.onGround = True  # и становится на что-то твердое
-                    self.yvel = 0  # и энергия падения пропадает
-
-                if yvel < 0:  # если движется вверх
-                    self.rect.top = p.rect.bottom  # то не движется вверх
-                    self.yvel = 0  # и энергия прыжка пропадает
+        # Рисуем спрайт поверх хитбокса
+        screen.blit(self.image, (sprite_x, sprite_y))
 
 
 class Background(sprite.Sprite):
