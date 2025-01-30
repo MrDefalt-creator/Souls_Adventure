@@ -22,36 +22,35 @@ BackGround3 = Background('Assets/Woods/background/layer3.png', [0,0])
 num_columns = tile_sheet.get_width()
 num_rows = tile_sheet.get_height()
 
-hero = Player(55,55) # создаем героя по (x,y) координатам
+hero = Player(55,600) # создаем героя по (x,y) координатам
 left = right = False
 up = False
 
 entities = pygame.sprite.Group() # Все объекты
 platforms = [] # то, во что мы будем врезаться или опираться
-entities.add(hero)
 
 level = [
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4222222222222222222222223",
-       "4000000000000000000000005"]
+       "5",
+       "5",
+       "5",
+       "5",
+       "5",
+       "5",
+       "5",
+       "5",
+       "5",
+       "5",
+       "5",
+       "5         2",
+       "5222222222222222222222223",
+       "5000000000000000000000005"]
 
 timer = pygame.time.Clock()
 x=y=0 # координаты
 for row in level: # вся строка
     for col in row: # каждый символ
         if col != " ":
-            #создаем блок, заливаем его цветом и рисеум его
+            #создаем блок, заливаем его цветом и рисуем его
             pf = Platform(x,y,col)
             entities.add(pf)
             platforms.append(pf)
@@ -99,10 +98,12 @@ while running:
 
     for e in entities:
         screen.blit(e.image, e.rect)
+        draw.rect(screen, (0,0,0), e.rect)
 
     #camera.update(hero)
     hero.update(left, right, up, platforms) # передвижение
     screen.blit(hero.image, hero.rect)
+    pygame.draw.rect(screen, (0,0,0), hero.rect)
     pygame.display.update() 
 
 pygame.quit()

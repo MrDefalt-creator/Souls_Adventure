@@ -1,10 +1,15 @@
 from pygame import *
 
 tile_sheet = image.load("Assets/Woods/oak_woods_tileset.png")
-warrior_sheet = image.load("Assets/Warrior/adventurer-sheet2.png")
+sheets = {
+    "Warrior": image.load("Assets/Warrior/adventurer-sheet2.png")
+}
 
-w_width = 50
-w_height = 37
+sprite_params = {
+    "Tile": (24,24),
+    "Warrior": (50,37),
+    "Witch": ()
+}
 
 tiles = [
     [1,1],

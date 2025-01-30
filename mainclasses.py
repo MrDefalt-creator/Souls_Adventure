@@ -54,8 +54,9 @@ class Player(sprite.Sprite):
         self.onGround = False  # На земле ли я?
         self.image = Surface((WIDTH, HEIGHT))
         self.image.fill(Color(COLOR))
-        self.image = transform.scale(get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height),(150, 110))
-        self.rect = Rect(x, y, WIDTH, HEIGHT)  # прямоугольный объект
+        self.image = transform.scale(get_sprite(sheets["Warrior"], warrior[0][0], warrior[0][1], sprite_params["Warrior"][0], sprite_params["Warrior"][1]),(150, 110))
+        self.rect = Rect(x, y, WIDTH, HEIGHT) # прямоугольный объект
+        self.rect.bottomleft = (x, y)
         self.image.set_colorkey((0, 0, 0))
 
     def update(self, left, right, up, platforms):
@@ -67,14 +68,13 @@ class Player(sprite.Sprite):
 
         if left:
             self.xvel = -MOVE_SPEED  # Лево = x- n
-            self.image = transform.scale(get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, True), (150, 110))
+            self.image = transform.scale(get_sprite(sheets["Warrior"], warrior[0][0], warrior[0][1], sprite_params["Warrior"][0], sprite_params["Warrior"][1], True), (150, 110))
             self.image.set_colorkey((0, 0, 0))
             # self.image.fill(Color(COLOR))
 
         if right:
             self.xvel = MOVE_SPEED  # Право = x + n
-            self.image = transform.scale(
-                get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, False), (150, 110))
+            self.image = transform.scale(get_sprite(sheets["Warrior"], warrior[0][0], warrior[0][1], sprite_params["Warrior"][0], sprite_params["Warrior"][1]), (150, 110))
             self.image.set_colorkey((0, 0, 0))
             # self.image.fill(Color(COLOR))
 
@@ -126,7 +126,7 @@ class Platform(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image.fill(Color(PLATFORM_COLOR))
-        self.image = transform.scale(get_sprite(tile_sheet, tiles[int(tile)][0], tiles[int(tile)][1], 24, 24),
-                                     (PLATFORM_WIDTH, PLATFORM_HEIGHT))
+        self.image = transform.scale(get_sprite(tile_sheet, tiles[int(tile)][0], tiles[int(tile)][1], sprite_params["Tile"][0], sprite_params["Tile"][1]), (PLATFORM_WIDTH, PLATFORM_HEIGHT))
+        
         self.image.set_colorkey((0, 0, 0))
         self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
