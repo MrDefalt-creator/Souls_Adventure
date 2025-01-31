@@ -8,60 +8,6 @@ import random
 # Initialize pygame
 pygame.init()
 
-
-def generate_level(width, height):
-    level = []
-    for _ in range(height):
-        level.append([' '] * width)  # Пустые места пробелами
-
-    # Создаем землю внизу (платформа с краями)
-    if width >= 2:
-        ground_row = ['4'] + ['2'] * (width - 2) + ['5']
-    else:
-        ground_row = ['4'] * width
-    level[-1] = ground_row
-
-    current_x = 5
-    current_y = height - 5  # Начальная позиция над землей
-
-    # Генерация основных платформ
-    while current_x < width - 5:
-        platform_length = random.randint(2, 5)
-        end_x = current_x + platform_length
-        if end_x >= width:
-            end_x = width - 1
-            platform_length = end_x - current_x
-
-        # Левый край платформы
-        if current_x < width:
-            level[current_y][current_x] = '4'
-        # Середина
-        for x in range(current_x + 1, end_x):
-            if x < width:
-                level[current_y][x] = '2'
-        # Правый край
-        if end_x < width:
-            level[current_y][end_x] = '5'
-
-        # Переход к следующей платформе
-        current_x += platform_length + random.randint(2, 4)
-        # Изменение высоты
-        delta_y = random.randint(-2, 2)
-        current_y = max(3, min(current_y + delta_y, height - 2))
-
-    # Добавляем случайные небольшие платформы
-    for _ in range(20):
-        plat_x = random.randint(0, width - 3)
-        plat_y = random.randint(3, height - 4)
-        if (plat_x + 2 < width and
-                level[plat_y][plat_x] == ' ' and
-                level[plat_y][plat_x + 1] == ' ' and
-                level[plat_y][plat_x + 2] == ' '):
-            level[plat_y][plat_x] = '4'
-            level[plat_y][plat_x + 1] = '2'
-            level[plat_y][plat_x + 2] = '5'
-
-    return [''.join(row) for row in level]
 # Define constants for the screen width and height
 # Create the screen object
 # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
@@ -84,14 +30,13 @@ hero = Player(200,600, "Warrior") # создаем героя по (x,y) коо�
 left = right = False
 up = False
 z = False
-z = False
 
 entities = pygame.sprite.Group() # Все объекты
 platforms = [] # то, во что мы будем врезаться или опираться
 entities.add()
 
 level = [
-       "4",
+       "4                                                                               ",
        "4",
        "4",
        "4",
@@ -108,7 +53,6 @@ level = [
 
 timer = pygame.time.Clock()
 x=y=0 # координатыz
-x=y=0 # координатыz
 for row in level: # вся строка
     for col in row: # каждый символ
         if col != " ":
@@ -123,6 +67,8 @@ for row in level: # вся строка
 
 total_level_width  = len(level[0])*PLATFORM_WIDTH # Высчитываем фактическую ширину уровня
 total_level_height = len(level)*PLATFORM_HEIGHT
+
+print(total_level_width)
 
 camera = Camera(camera_configure, total_level_width, total_level_height)
 
@@ -142,8 +88,6 @@ while running:
             right = True
         if event.type == KEYDOWN and event.key == K_z:
             z = True
-        if event.type == KEYDOWN and event.key == K_z:
-            z = True
 
 
         if event.type == KEYUP and event.key == K_UP:
@@ -154,8 +98,6 @@ while running:
             left = False
         if event.type == KEYUP and event.key == K_z:
             z = False
-        if event.type == KEYUP and event.key == K_z:
-            z = False
     
     screen.fill([255, 255, 255])
     screen.blit(BackGround1.image, BackGround1.rect)
@@ -163,10 +105,9 @@ while running:
     screen.blit(BackGround3.image, BackGround3.rect)
 
     for e in entities:
-        screen.blit(e.image, e.rect)
+        screen.blit(e.image, camera.apply(e))
 
-    #camera.update(hero)
-    hero.update(left, right, up, platforms, z) # передвижение
+    camera.update(hero)
     hero.update(left, right, up, platforms, z) # передвижение
     hero.draw(screen)
     pygame.display.update() 
