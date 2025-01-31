@@ -22,7 +22,10 @@ BackGround3 = Background('Assets/Woods/background/layer3.png', [0,0])
 num_columns = tile_sheet.get_width()
 num_rows = tile_sheet.get_height()
 
-hero = Player(55,55) # создаем героя по (x,y) координатам
+# Вызов меню перед игрой
+main_menu(screen)
+
+hero = Player(200,600, "Warrior") # создаем героя по (x,y) координатам
 left = right = False
 up = False
 
@@ -63,11 +66,7 @@ for row in level: # вся строка
 total_level_width  = len(level[0])*PLATFORM_WIDTH # Высчитываем фактическую ширину уровня
 total_level_height = len(level)*PLATFORM_HEIGHT
 
-camera = Camera(camera_configure, total_level_width, total_level_height) 
-
-# Вызов меню перед игрой
-main_menu(screen)
-
+camera = Camera(camera_configure, total_level_width, total_level_height)
 
 # Main loop
 

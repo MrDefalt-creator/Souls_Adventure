@@ -54,7 +54,7 @@ def main_menu(screen):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if play_button.collidepoint(mx, my):
-                    return  # Запуск игры
+                    return "Warrior" # Запуск игры
                 if exit_button.collidepoint(mx, my):
                     pygame.quit()
                     sys.exit()

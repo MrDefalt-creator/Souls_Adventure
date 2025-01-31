@@ -1,7 +1,17 @@
 import pygame
 from pygame import *
 from spritehandler import *
+from animator import Animation
 import os
+
+TYPICAL_ANIMS = {
+    "Warrior": {
+        "Idle": (1,0),
+        "Walk": (1,0),
+        "Jump": (0,1),
+        #"Attack": (0,0)
+    }
+}
 
 MOVE_SPEED = 7
 WIDTH = 52
@@ -46,17 +56,23 @@ def camera_configure(camera, target_rect):
 
 
 class Player(sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, charType):
         sprite.Sprite.__init__(self)
         self.xvel = 0
         self.yvel = 0
         self.onGround = False
+        self.Animations = {
+            "Left": {},
+            "Right": {}
+        }
+        self.facing = "Right"
+        self.charType = charType
 
         # Загружаем спрайт
         self.sprite_width = 150
         self.sprite_height = 110
         self.image = transform.scale(
-            get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height),
+            get_sprite(sheets["Warrior"], warrior[0][0], warrior[0][1], sprite_params["Warrior"][0], sprite_params["Warrior"][1]),
             (self.sprite_width, self.sprite_height)
         )
         self.image.set_colorkey((0, 0, 0))
@@ -66,6 +82,10 @@ class Player(sprite.Sprite):
         self.hitbox_height = 90  # Подкорректируйте, если нужно
         self.rect = Rect(x, y, self.hitbox_width, self.hitbox_height)
 
+        for direction in ["Left", "Right"]:
+            for anim, params in TYPICAL_ANIMS[self.charType].items():
+                self.Animations[direction][anim] = Animation(anim, self.charType, direction, params[0], params[1])
+
     def update(self, left, right, up, platforms):
         if up and self.onGround:
             self.yvel = -JUMP_POWER
@@ -73,17 +93,19 @@ class Player(sprite.Sprite):
         if left:
             self.xvel = -MOVE_SPEED
             self.image = transform.scale(
-                get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, True),
+                get_sprite(sheets["Warrior"], warrior[0][0], warrior[0][1], sprite_params["Warrior"][0], sprite_params["Warrior"][1], True),
                 (self.sprite_width, self.sprite_height)
             )
+            self.facing = "Left"
             self.image.set_colorkey((0, 0, 0))
 
         if right:
             self.xvel = MOVE_SPEED
             self.image = transform.scale(
-                get_sprite(warrior_sheet, warrior[0][0], warrior[0][1], w_width, w_height, False),
+                get_sprite(sheets["Warrior"], warrior[0][0], warrior[0][1], sprite_params["Warrior"][0], sprite_params["Warrior"][1], False),
                 (self.sprite_width, self.sprite_height)
             )
+            self.facing = "Right"
             self.image.set_colorkey((0, 0, 0))
 
         if not (left or right):
@@ -139,7 +161,7 @@ class Platform(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image.fill(Color(PLATFORM_COLOR))
-        self.image = transform.scale(get_sprite(tile_sheet, tiles[int(tile)][0], tiles[int(tile)][1], 24, 24),
+        self.image = transform.scale(get_sprite(tile_sheet, tiles[int(tile)][0], tiles[int(tile)][1], sprite_params["Tile"][0], sprite_params["Tile"][1]),
                                      (PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image.set_colorkey((0, 0, 0))
         self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
