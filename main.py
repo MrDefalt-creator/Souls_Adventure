@@ -84,6 +84,7 @@ hero = Player(200,600, "Warrior") # создаем героя по (x,y) коо�
 left = right = False
 up = False
 z = False
+z = False
 
 entities = pygame.sprite.Group() # Все объекты
 platforms = [] # то, во что мы будем врезаться или опираться
@@ -106,6 +107,7 @@ level = [
        "4000000000000000000000005"]
 
 timer = pygame.time.Clock()
+x=y=0 # координатыz
 x=y=0 # координатыz
 for row in level: # вся строка
     for col in row: # каждый символ
@@ -140,6 +142,8 @@ while running:
             right = True
         if event.type == KEYDOWN and event.key == K_z:
             z = True
+        if event.type == KEYDOWN and event.key == K_z:
+            z = True
 
 
         if event.type == KEYUP and event.key == K_UP:
@@ -148,6 +152,8 @@ while running:
             right = False
         if event.type == KEYUP and event.key == K_LEFT:
             left = False
+        if event.type == KEYUP and event.key == K_z:
+            z = False
         if event.type == KEYUP and event.key == K_z:
             z = False
     
@@ -160,6 +166,7 @@ while running:
         screen.blit(e.image, e.rect)
 
     #camera.update(hero)
+    hero.update(left, right, up, platforms, z) # передвижение
     hero.update(left, right, up, platforms, z) # передвижение
     hero.draw(screen)
     pygame.display.update() 
