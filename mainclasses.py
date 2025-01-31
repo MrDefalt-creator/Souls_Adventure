@@ -6,10 +6,13 @@ import os
 
 TYPICAL_ANIMS = {
     "Warrior": {
-        "Idle": (1,0),
-        "Walk": (1,0),
-        "Jump": (0,1),
-        #"Attack": (0,0)
+        "Idle": (1,0,170),
+        "Walk": (1,0,100),
+        "Jump": (0,1,75),
+        "Fall": (1,0,100),
+        "Attack1": (0,0,75),
+        "Attack2": (0,0,75),
+        "Attack3": (0,0,75)
     }
 }
 
@@ -67,6 +70,9 @@ class Player(sprite.Sprite):
         }
         self.facing = "Right"
         self.charType = charType
+        self.isJumping = False
+        self.isAttacking = False
+        self.attackCount = 0
 
         # Загружаем спрайт
         self.sprite_width = 150
@@ -84,32 +90,31 @@ class Player(sprite.Sprite):
 
         for direction in ["Left", "Right"]:
             for anim, params in TYPICAL_ANIMS[self.charType].items():
-                self.Animations[direction][anim] = Animation(anim, self.charType, direction, params[0], params[1])
+                Animation(self, anim, self.charType, direction, params[0], params[1], params[2])
 
-    def update(self, left, right, up, platforms):
-        if up and self.onGround:
+    def update(self, left, right, up, platforms, z):
+        if up and self.onGround and not self.isAttacking:
             self.yvel = -JUMP_POWER
+            self.isJumping = True
+            self.playAnim("Jump")
 
-        if left:
+        if left and not self.isAttacking:
             self.xvel = -MOVE_SPEED
-            self.image = transform.scale(
-                get_sprite(sheets["Warrior"], warrior[0][0], warrior[0][1], sprite_params["Warrior"][0], sprite_params["Warrior"][1], True),
-                (self.sprite_width, self.sprite_height)
-            )
             self.facing = "Left"
-            self.image.set_colorkey((0, 0, 0))
+            self.playAnim("Walk")
 
-        if right:
+        if right and not self.isAttacking:
             self.xvel = MOVE_SPEED
             self.image = transform.scale(
                 get_sprite(sheets["Warrior"], warrior[0][0], warrior[0][1], sprite_params["Warrior"][0], sprite_params["Warrior"][1], False),
                 (self.sprite_width, self.sprite_height)
             )
             self.facing = "Right"
-            self.image.set_colorkey((0, 0, 0))
+            self.playAnim("Walk")
 
-        if not (left or right):
+        if not (left or right) and not self.isAttacking:
             self.xvel = 0
+            self.playAnim("Idle")
 
         if not self.onGround:
             self.yvel += GRAVITY
@@ -121,6 +126,29 @@ class Player(sprite.Sprite):
         self.rect.x += self.xvel
         self.collide(self.xvel, 0, platforms)
 
+        if self.isJumping and not (self.Animations["Left"]["Jump"].isPlaying or self.Animations["Right"]["Jump"].isPlaying):
+            self.playAnim("Fall")
+        elif self.isJumping:
+            self.playAnim("Jump")
+
+        if z and not self.isAttacking:
+            self.attackCount += 1
+            if self.attackCount == 4: self.attackCount = 1
+            self.isAttacking = True
+            self.xvel = 0
+
+        if self.isAttacking:
+            self.playAnim(f"Attack{self.attackCount}")
+            if not self.Animations[self.facing][f"Attack{self.attackCount}"].isPlaying:
+                self.isAttacking = False
+
+
+    def playAnim(self, name):
+        self.Animations[self.facing][name].play()
+
+    def stopAnim(self, name):
+        self.Animations[self.facing][name].stop()
+
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
             if sprite.collide_rect(self, p):
@@ -131,6 +159,8 @@ class Player(sprite.Sprite):
                 if yvel > 0:
                     self.rect.bottom = p.rect.top
                     self.onGround = True
+                    self.isJumping = False
+                    self.stopAnim("Jump")
                     self.yvel = 0
                 if yvel < 0:
                     self.rect.top = p.rect.bottom
@@ -138,7 +168,7 @@ class Player(sprite.Sprite):
 
     def draw(self, screen):
         # Рисуем хитбокс (для отладки)
-        pygame.draw.rect(screen, (0, 255, 0), self.rect, 2)  # Зеленый контур хитбокса
+        #pygame.draw.rect(screen, (0, 255, 0), self.rect, 2)  # Зеленый контур хитбокса
 
         # Смещаем спрайт так, чтобы он находился над хитбоксом
         sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2
