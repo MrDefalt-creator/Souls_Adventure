@@ -3,6 +3,7 @@ import pygame
 from pygame import *
 from mainclasses import *
 from menu import *
+from InfiniteScrolling import Scroller
 import random
 
 # Initialize pygame
@@ -11,7 +12,7 @@ pygame.init()
 # Define constants for the screen width and height
 # Create the screen object
 # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.SCALED, vsync=1)
 pygame.display.set_caption("The Epic Adventure")
 
 CameraX, CameraY = 0, 0
@@ -30,6 +31,11 @@ num_rows = tile_sheet.get_height()
 main_menu(screen)
 
 hero = Player(200,600, "Warrior") # создаем героя по (x,y) координатам
+
+BackGround1 = Scroller(BackGround1, hero)
+BackGround2 = Scroller(BackGround2, hero)
+BackGround3 = Scroller(BackGround3, hero)
+
 left = right = False
 up = False
 z = False
@@ -39,20 +45,20 @@ platforms = [] # то, во что мы будем врезаться или о�
 entities.add()
 
 level = [
-       "4                               ",
-       "4                               ",
-       "4                               ",
-       "4                               ",
-       "4                               ",
-       "4                               ",
-       "4                               ",
-       "4                               ",
-       "4                6              ",
-       "4                               ",
-       "4          7                    ",
-       "4          8                    ",
-       "422222222222222222222222222222223",
-       "400000000000000000000000000000005"]
+       "                                                                                                              ",
+       "                                                                                                              ",
+       "                                                                                                              ",
+       "                                                                                                              ",
+       "                             6                                                                                ",
+       "                                                                                                              ",
+       "                        6                                                                                     ",
+       "                                                                                                              ",
+       "                 6                                                                                            ",
+       "                                                                                                              ",
+       "           7                                                                                                  ",
+       "           8                                                                                                  ",
+       "12222222222222222222222222222222222222223     1222222222222222222222222222222222222222222222222222222222222223",
+       "40000000000000000000000000000000000000005     4000000000000000000000000000000000000000000000000000000000000005"]
 
 timer = pygame.time.Clock()
 x=y=0 # координатыz
@@ -70,8 +76,6 @@ for row in level: # вся строка
 
 total_level_width  = len(level[0])*PLATFORM_WIDTH # Высчитываем фактическую ширину уровня
 total_level_height = len(level)*PLATFORM_HEIGHT
-
-print(total_level_width)
 
 camera = Camera(camera_configure, total_level_width, total_level_height)
 
@@ -103,19 +107,33 @@ while running:
             z = False
     
     screen.fill([255, 255, 255])
-    screen.blit(BackGround1.image, BackGround1.rect)
-    screen.blit(BackGround2.image, BackGround2.rect)
-    screen.blit(BackGround3.image, BackGround3.rect)
+
+    for bg in ["Left", "Center", "Right"]:
+        camera.apply(BackGround1.backs[bg], 6)
+        screen.blit(BackGround1.backs["Image"], BackGround1.backs[bg].rect)
+
+    for bg in ["Left", "Center", "Right"]:
+        camera.apply(BackGround2.backs[bg], 3)
+        screen.blit(BackGround2.backs["Image"], BackGround2.backs[bg].rect)
+
+    for bg in ["Left", "Center", "Right"]:
+        camera.apply(BackGround3.backs[bg], 1.5)
+        screen.blit(BackGround3.backs["Image"], BackGround3.backs[bg].rect)
 
     for e in entities:
         camera.apply(e)
         screen.blit(e.image, e.rect)
 
     camera.apply(hero)
-    draw.rect(screen, (0,0,0), hero.rect)
     camera.update(hero)
     hero.update(left, right, up, platforms, z) # передвижение
+
     hero.draw(screen)
-    pygame.display.update() 
+
+    BackGround1.update()
+    BackGround2.update()
+    BackGround3.update()
+
+    pygame.display.update()
 
 pygame.quit()

@@ -38,8 +38,8 @@ class Camera(object):
         self.camera_func = camera_func
         self.state = Rect(0, 0, width, height)
 
-    def apply(self, target):
-        return target.rect.move_ip(self.state.topright)
+    def apply(self, target, multiplier = 1):
+        return target.rect.move_ip(self.state.x / multiplier, self.state.y)
 
     def update(self, target):
         self.state = self.camera_func(self.state, target.rect)
@@ -50,9 +50,8 @@ def camera_configure(camera, target_rect):
     _, _, w, h = camera
     l, t = -l + SCREEN_WIDTH / 2, -t + SCREEN_HEIGHT / 2
 
-    l = min(0, l)  # Не движемся дальше левой границы
-    l = max(-(camera.width - SCREEN_WIDTH), l)  # Не движемся дальше правой границы
-    t = max(-(camera.height - SCREEN_HEIGHT), t)  # Не движемся дальше нижней границы
+    l = max(-(camera.width - SCREEN_WIDTH), l)  # Не движемся дальше левой границы
+    t = max((camera.height - SCREEN_HEIGHT), t)  # Не движемся дальше нижней границы
     t = min(0, t)  # Не движемся дальше верхней границы
 
     return Rect(l, t, w, h)
@@ -168,7 +167,7 @@ class Player(sprite.Sprite):
 
     def draw(self, screen):
         # Рисуем хитбокс (для отладки)
-        #pygame.draw.rect(screen, (0, 255, 0), self.rect, 2)  # Зеленый контур хитбокса
+        # pygame.draw.rect(screen, (0, 255, 0), self.rect, 2)  # Зеленый контур хитбокса
 
         # Смещаем спрайт так, чтобы он находился над хитбоксом
         sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2
