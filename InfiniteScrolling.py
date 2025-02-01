@@ -20,7 +20,8 @@ class Scroller(sprite.Sprite):
         self.backs["Right"].rect = Rect(0, 0, self.backs["Center"].rect.width, self.backs["Center"].rect.height).move(self.backs["Center"].rect.topright)
 
         for bg in ["Left","Right"]:
-            if sprite.collide_rect(self.hero, self.backs[bg]):
+            if sprite.collide_rect(self.hero, self.backs[bg]) and not sprite.collide_rect(self.hero, self.backs["Center"]):
+                print(bg)
                 self.backs["Center"].rect = self.backs[bg].rect
                 break
 

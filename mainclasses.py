@@ -58,10 +58,11 @@ def camera_configure(camera, target_rect):
 
 
 class Player(sprite.Sprite):
-    def __init__(self, x, y, charType):
+    def __init__(self, x, y, charType, spawn):
         sprite.Sprite.__init__(self)
         self.xvel = 0
         self.yvel = 0
+        self.spawn = spawn
         self.onGround = False
         self.Animations = {
             "Left": {},
@@ -85,7 +86,8 @@ class Player(sprite.Sprite):
         # Создаем хитбокс (уменьшим его, чтобы он совпадал с ногами персонажа)
         self.hitbox_width = 50
         self.hitbox_height = 90  # Подкорректируйте, если нужно
-        self.rect = Rect(x, y, self.hitbox_width, self.hitbox_height)
+        self.startPos = Rect(x, y, self.hitbox_width, self.hitbox_height)
+        self.rect = self.startPos
 
         for direction in ["Left", "Right"]:
             for anim, params in TYPICAL_ANIMS[self.charType].items():
@@ -141,6 +143,8 @@ class Player(sprite.Sprite):
             if not self.Animations[self.facing][f"Attack{self.attackCount}"].isPlaying:
                 self.isAttacking = False
 
+        if self.rect.y > 700:
+            self.respawn()
 
     def playAnim(self, name):
         self.Animations[self.facing][name].play()
@@ -148,9 +152,13 @@ class Player(sprite.Sprite):
     def stopAnim(self, name):
         self.Animations[self.facing][name].stop()
 
+    def respawn(self):
+        self.rect.x = self.spawn.rect.x
+        self.rect.y = self.spawn.rect.y
+
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
-            if sprite.collide_rect(self, p):
+            if sprite.collide_rect(self, p) and p.canCollide:
                 if xvel > 0:
                     self.rect.right = p.rect.left
                 if xvel < 0:
@@ -188,9 +196,10 @@ class Background(sprite.Sprite):
 class Platform(sprite.Sprite):
     def __init__(self, x, y, tile):
         sprite.Sprite.__init__(self)
+        self.canCollide = True if tile != "-" else False
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image.fill(Color(PLATFORM_COLOR))
-        self.image = transform.scale(get_sprite(tile_sheet, tiles[int(tile)][0], tiles[int(tile)][1], sprite_params["Tile"][0], sprite_params["Tile"][1]),
+        self.image = transform.scale(get_sprite(tile_sheet, tiles[tile][0], tiles[tile][1], sprite_params["Tile"][0], sprite_params["Tile"][1]),
                                      (PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image.set_colorkey((0, 0, 0))
         self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
