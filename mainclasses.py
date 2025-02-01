@@ -39,7 +39,7 @@ class Camera(object):
         self.state = Rect(0, 0, width, height)
 
     def apply(self, target):
-        return target.rect.move(self.state.topleft)
+        return target.rect.move_ip(self.state.topright)
 
     def update(self, target):
         self.state = self.camera_func(self.state, target.rect)

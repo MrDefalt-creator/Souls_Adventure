@@ -14,6 +14,9 @@ pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("The Epic Adventure")
 
+CameraX, CameraY = 0, 0
+
+
 running = True
 
 BackGround1 = Background('Assets/Woods/background/layer1.png', [0,0])
@@ -36,20 +39,20 @@ platforms = [] # то, во что мы будем врезаться или о�
 entities.add()
 
 level = [
-       "4                                                                               ",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4",
-       "4                6",
-       "4",
-       "4          7",
-       "4          8",
-       "4222222222222222222222223",
-       "4000000000000000000000005"]
+       "4                               ",
+       "4                               ",
+       "4                               ",
+       "4                               ",
+       "4                               ",
+       "4                               ",
+       "4                               ",
+       "4                               ",
+       "4                6              ",
+       "4                               ",
+       "4          7                    ",
+       "4          8                    ",
+       "422222222222222222222222222222223",
+       "400000000000000000000000000000005"]
 
 timer = pygame.time.Clock()
 x=y=0 # координатыz
@@ -105,8 +108,11 @@ while running:
     screen.blit(BackGround3.image, BackGround3.rect)
 
     for e in entities:
-        screen.blit(e.image, camera.apply(e))
+        camera.apply(e)
+        screen.blit(e.image, e.rect)
 
+    camera.apply(hero)
+    draw.rect(screen, (0,0,0), hero.rect)
     camera.update(hero)
     hero.update(left, right, up, platforms, z) # передвижение
     hero.draw(screen)
