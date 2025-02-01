@@ -30,11 +30,7 @@ num_rows = tile_sheet.get_height()
 # Вызов меню перед игрой
 main_menu(screen)
 
-hero = Player(200,600, "Warrior") # создаем героя по (x,y) координатам
-
-BackGround1 = Scroller(BackGround1, hero)
-BackGround2 = Scroller(BackGround2, hero)
-BackGround3 = Scroller(BackGround3, hero)
+ # создаем героя по (x,y) координатам
 
 left = right = False
 up = False
@@ -56,7 +52,7 @@ level = [
        "                 6                                                                                            ",
        "                                                                                                              ",
        "           7                                                                                                  ",
-       "           8                                                                                                  ",
+       "   -       8                                                                                                  ",
        "12222222222222222222222222222222222222223     1222222222222222222222222222222222222222222222222222222222222223",
        "40000000000000000000000000000000000000005     4000000000000000000000000000000000000000000000000000000000000005"]
 
@@ -65,10 +61,12 @@ x=y=0 # координатыz
 for row in level: # вся строка
     for col in row: # каждый символ
         if col != " ":
-            #создаем блок, заливаем его цветом и рисеум его
-            pf = Platform(x,y,col)
+            pf = Platform(x, y, col)
             entities.add(pf)
             platforms.append(pf)
+            if col == "-":
+                hero = Player(x, y, "Warrior", pf)
+            #создаем блок, заливаем его цветом и рисеум его
                     
         x += PLATFORM_WIDTH #блоки платформы ставятся на ширине блоков
     y += PLATFORM_HEIGHT    #то же самое и с высотой
@@ -76,6 +74,10 @@ for row in level: # вся строка
 
 total_level_width  = len(level[0])*PLATFORM_WIDTH # Высчитываем фактическую ширину уровня
 total_level_height = len(level)*PLATFORM_HEIGHT
+
+BackGround1 = Scroller(BackGround1, hero)
+BackGround2 = Scroller(BackGround2, hero)
+BackGround3 = Scroller(BackGround3, hero)
 
 camera = Camera(camera_configure, total_level_width, total_level_height)
 
