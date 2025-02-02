@@ -1,18 +1,25 @@
+import time
 import pygame
 from pygame import *
 from spritehandler import *
-from animator import Animation
+from types import SimpleNamespace as namespace
+from animator import *
 import os
+
+directions = {
+    "Right": 1,
+    "Left": -1
+}
 
 TYPICAL_ANIMS = {
     "Warrior": {
         "Idle": (1,0,170),
         "Walk": (1,0,100),
-        "Jump": (0,1,75),
+        "Jump": (0,0,75),
         "Fall": (1,0,100),
         "Attack1": (0,0,75),
         "Attack2": (0,0,75),
-        "Attack3": (0,0,75)
+        "Attack3": (0,0,50)
     },
     "Skeleton":{
         "Idle": (1,0,100),
@@ -70,11 +77,16 @@ class Player(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.xvel = 0
         self.yvel = 0
+        self.isVisible = True
         self.inv = False
+        self.isHurt = False
+        self.hurtTick = -1000
+        self.invTick = -4000
         self.spawn = spawn
         self.maxhealth = 4
         self.health = self.maxhealth
         self.onGround = False
+        self.attack = namespace(rect = Rect(0,0,50,100))
         self.Animations = {
             "Left": {},
             "Right": {}
@@ -104,13 +116,38 @@ class Player(sprite.Sprite):
             for anim, params in TYPICAL_ANIMS[self.charType].items():
                 Animation(self, anim, self.charType, direction, params[0], params[1], params[2])
 
-    def update(self, left, right, up, platforms, z):
-        if up and self.onGround and not self.isAttacking:
+    def update(self, left, right, up, platforms, z, enemies):
+
+        invDiff = time.get_ticks() - self.invTick
+
+        if invDiff > 3000:
+            self.inv = False
+            self.isVisible = True
+        else:
+            if (invDiff // 150) % 2 == 0:
+                self.isVisible = False
+            else:
+                self.isVisible = True
+
+
+        if time.get_ticks() - self.hurtTick > 500:
+            self.isHurt = False
+
+        if up and self.onGround and not self.isAttacking and not self.isHurt:
             self.yvel = -JUMP_POWER
             self.isJumping = True
             self.playAnim("Jump")
 
-        if left:
+        if self.rect.y > 700:
+            self.addHealth(-1)
+            if self.health > 0:
+                self.respawn()
+                self.inv = True
+                self.invTick = time.get_ticks()
+            right = False
+            left = False
+
+        if left and not self.isHurt:
             if self.isAttacking:
                 if self.isJumping and self.facing == "Left":
                     self.xvel = -MOVE_SPEED
@@ -121,7 +158,7 @@ class Player(sprite.Sprite):
                 self.facing = "Left"
                 self.playAnim("Walk")
 
-        if right:
+        if right and not self.isHurt:
             if self.isAttacking:
                 if self.isJumping and self.facing == "Right":
                     self.xvel = MOVE_SPEED
@@ -132,7 +169,7 @@ class Player(sprite.Sprite):
                 self.facing = "Right"
                 self.playAnim("Walk")
 
-        if not (left or right) and not self.isAttacking:
+        if not (left or right) and not self.isAttacking and not self.isHurt:
             self.xvel = 0
             self.playAnim("Idle")
 
@@ -151,7 +188,7 @@ class Player(sprite.Sprite):
         elif self.isJumping:
             self.playAnim("Jump")
 
-        if z and not self.isAttacking:
+        if z and not self.isAttacking and not self.isHurt:
             self.attackCount += 1
             if self.attackCount == 4: self.attackCount = 1
             self.isAttacking = True
@@ -162,9 +199,13 @@ class Player(sprite.Sprite):
             if not self.Animations[self.facing][f"Attack{self.attackCount}"].isPlaying:
                 self.isAttacking = False
 
-        if self.rect.y > 700:
-            self.respawn()
-            self.addHealth(-1)
+        if self.isHurt:
+            self.playAnim("Jump")
+
+        self.attack.rect.centerx = self.rect.centerx + directions[self.facing] * 50
+        self.attack.rect.centery = self.rect.centery
+
+        self.checkDamage(enemies)
 
     def playAnim(self, name):
         self.Animations[self.facing][name].play()
@@ -198,8 +239,20 @@ class Player(sprite.Sprite):
         
     def checkDamage(self, enemies):
         for e in enemies:
-            if sprite.collide_rect(self, e) and not self.inv:
+            if sprite.collide_rect(self, e) and not self.inv and not e.health <= 0:
                 self.addHealth(-1)
+                self.inv = True
+                self.invTick = time.get_ticks()
+                self.isHurt = True
+                self.hurtTick = time.get_ticks()
+                self.yvel = -7
+                self.xvel = 7 * directions[getOppositeDirection(self.facing)]
+            if sprite.collide_rect(self.attack, e) and self.isAttacking and not e.inv and not e.health <= 0:
+                e.addHealth(-1)
+                e.inv = True
+                e.invTick = time.get_ticks()
+                e.isHurt = True
+                e.facing = getOppositeDirection(self.facing)
 
 
     def draw(self, screen):

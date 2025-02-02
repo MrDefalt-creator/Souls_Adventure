@@ -75,6 +75,9 @@ class Animation(sprite.Sprite):
         if self.lastFrame >= len(self.actual_frames):
             if self.isLooped:
                 self.lastFrame = 0
+            elif self.doesLinger:
+                self.lastFrame = len(self.actual_frames) - 1
+                self.target.image = self.actual_frames[self.lastFrame]
             else:
                 self.stop()
 

@@ -10,7 +10,10 @@ class Enemy(pygame.sprite.Sprite):
         self.xvel = 0
         self.yvel = 0
         self.spawn = spawn
+        self.isHurt = False
+        self.hurtTick = -1000
         self.inv = False
+        self.invTick = -1000
         self.maxhealth = 4
         self.health = self.maxhealth
         self.onGround = False
@@ -39,7 +42,18 @@ class Enemy(pygame.sprite.Sprite):
     
     def update(self, platforms):
 
+        if time.get_ticks() - self.invTick > 500:
+            self.inv = False
+
         self.playAnim("Idle")
+
+        if self.isHurt and self.health >= 0:
+            self.playAnim("Take_hit")
+            if not self.Animations[self.facing]["Take_hit"].isPlaying:
+                self.isHurt = False
+
+        if not self.isHurt and self.health <= 0:
+            self.playAnim("Death")
     
         if not self.onGround:
             self.yvel += GRAVITY
@@ -50,6 +64,8 @@ class Enemy(pygame.sprite.Sprite):
 
         self.rect.x += self.xvel
         self.collide(self.xvel, 0, platforms)
+
+        print(self.health)
     
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
