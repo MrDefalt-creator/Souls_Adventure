@@ -3,14 +3,16 @@ from pygame import *
 tile_sheet = image.load("Assets/Woods/oak_woods_tileset.png")
 health_sheet = image.load("Assets/UI/LifeSheet.png")
 sheets = {
-    "Warrior": image.load("Assets/Warrior/adventurer-sheet2.png")
+    "Warrior": image.load("Assets/Warrior/adventurer-sheet2.png"),
+    "Skeleton": image.load("Assets/Skeleton/sprite-sheet.png")
 }
 
 sprite_params = {
     "Tile": (24,24),
     "Warrior": (50,37),
     "Witch": (),
-    "Health": (64, 16)
+    "Health": (64, 16),
+    "Skeleton":(150,150)
 }
 
 tiles = {
@@ -24,6 +26,7 @@ tiles = {
     "7": [6,2],
     "8": [6,4],
     "-": [4,0],
+    "e": [4,0]
 }
 
 health = [[0,0],[0,1],[0,2],[0,3],[0,4]]

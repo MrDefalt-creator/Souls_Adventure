@@ -4,6 +4,7 @@ from pygame import *
 from mainclasses import *
 from menu import *
 from GUI import GUI
+from Enemy import Enemy
 from InfiniteScrolling import Scroller
 import random
 
@@ -52,8 +53,8 @@ level = [
        "                                                                                                              ",
        "                 6                                                                                            ",
        "                                                                                                              ",
-       "           7                                                                                                  ",
-       "   -       8                                                                                                  ",
+       "            7                                                                                                 ",
+       "   -      e 8                                                                                                 ",
        "12222222222222222222222222222222222222223     1222222222222222222222222222222222222222222222222222222222222223",
        "40000000000000000000000000000000000000005     4000000000000000000000000000000000000000000000000000000000000005"]
 
@@ -67,6 +68,8 @@ for row in level: # вся строка
             platforms.append(pf)
             if col == "-":
                 hero = Player(x, y, "Warrior", pf)
+            elif col == "e":
+                enemy = Enemy(x,y, "Skeleton", pf)
             #создаем блок, заливаем его цветом и рисеум его
                     
         x += PLATFORM_WIDTH #блоки платформы ставятся на ширине блоков
@@ -136,12 +139,19 @@ while running:
 
     camera.apply(hero)
     camera.update(hero)
+
     healthbar.update()
-    hero.update(left, right, up, platforms, z)  # передвижение
+    
+    camera.apply(enemy)
+    hero.update(left, right, up, platforms, z)
+    enemy.update(platforms)
+
     camera.apply(healthbar, 10000)
     screen.blit(healthbar.image, healthbar.rect)
 
     hero.draw(screen)
+    pygame.draw.rect(screen, (255,255,255), enemy)
+    enemy.draw(screen)
 
     pygame.display.update()
 

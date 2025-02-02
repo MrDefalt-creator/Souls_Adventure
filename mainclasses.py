@@ -13,7 +13,14 @@ TYPICAL_ANIMS = {
         "Attack1": (0,0,75),
         "Attack2": (0,0,75),
         "Attack3": (0,0,75)
+    },
+    "Skeleton":{
+        "Idle": (1,0,100),
+        "Walk": (1,0,100),
+        "Take_hit": (0,0,100),
+        "Death": (0,1,100)
     }
+    
 }
 
 MOVE_SPEED = 7
@@ -63,6 +70,7 @@ class Player(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.xvel = 0
         self.yvel = 0
+        self.inv = False
         self.spawn = spawn
         self.maxhealth = 4
         self.health = self.maxhealth
@@ -187,6 +195,12 @@ class Player(sprite.Sprite):
                 if yvel < 0:
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
+        
+    def checkDamage(self, enemies):
+        for e in enemies:
+            if sprite.collide_rect(self, e) and not self.inv:
+                self.addHealth(-1)
+
 
     def draw(self, screen):
         # Рисуем хитбокс (для отладки)
@@ -211,7 +225,7 @@ class Background(sprite.Sprite):
 class Platform(sprite.Sprite):
     def __init__(self, x, y, tile):
         sprite.Sprite.__init__(self)
-        self.canCollide = True if tile != "-" else False
+        self.canCollide = True if tile != "-" and tile != "e" else False
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image.fill(Color(PLATFORM_COLOR))
         self.image = transform.scale(get_sprite(tile_sheet, tiles[tile][0], tiles[tile][1], sprite_params["Tile"][0], sprite_params["Tile"][1]),

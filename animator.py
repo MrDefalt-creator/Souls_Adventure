@@ -7,12 +7,6 @@ from pygame import *
 # Добавить в Player свойство hp, объяснения не требуются
 #
 
-Animations = {
-    # Крч, этот словарь должен быть перенесен в класс Player. В Player вызывается класс Animation и туда передаются нужные данные для анимации, потом сам класс заносится в этот словарь под ключом - именем анимации.
-    "Warrior": [],
-    "Witch": []
-}
-
 AnimFrames = {
     "Warrior": {
         "Idle": [(0, 0), (1, 0), (2, 0), (3, 0)],
@@ -26,6 +20,12 @@ AnimFrames = {
     },
     "Witch": {
 
+    },
+    "Skeleton": {
+        "Idle": [(0, 0), (1, 0), (2, 0), (3, 0)],
+        "Walk": [(0, 1), (1, 1), (2, 1), (3, 1)],
+        "Take_hit": [(0, 2), (1, 2), (2, 2), (3, 2)],
+        "Death": [(0, 3), (1, 3), (2, 3), (3, 3)],
     }
 }
 
@@ -33,7 +33,7 @@ def getOppositeDirection(string):
     return "Right" if string == "Left" else "Left"
 
 class Animation(sprite.Sprite):
-    def __init__(self, target, animName, charType, facing, isLooped, doesLinger, frameTime):
+    def __init__(self, target, animName, charType, facing, isLooped, doesLinger, frameTime, scalex=150, scaley=110):
         self.isPlaying = False
         self.animName = animName
         self.charType = charType
@@ -51,7 +51,7 @@ class Animation(sprite.Sprite):
         flipped = facing == "Left"
 
         for frame in Anim:
-            newframe = transform.scale(get_sprite(sheets[charType], frame[0], frame[1], sprite_params[charType][0], sprite_params[charType][1], flipped), (150, 110))
+            newframe = transform.scale(get_sprite(sheets[charType], frame[0], frame[1], sprite_params[charType][0], sprite_params[charType][1], flipped), (scalex, scaley))
             newframe.set_colorkey((0, 0, 0))
             self.actual_frames.append(newframe)
         
