@@ -11,6 +11,8 @@ directions = {
     "Left": -1
 }
 
+cantCollide = ["-", "e", "^"]
+
 TYPICAL_ANIMS = {
     "Warrior": {
         "Idle": (1,0,170),
@@ -22,7 +24,7 @@ TYPICAL_ANIMS = {
         "Attack3": (0,0,50)
     },
     "Skeleton":{
-        "Idle": (1,0,100),
+        "Idle": (1,0,170),
         "Walk": (1,0,100),
         "Take_hit": (0,0,100),
         "Death": (0,1,100)
@@ -222,31 +224,38 @@ class Player(sprite.Sprite):
 
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
-            if sprite.collide_rect(self, p) and p.canCollide:
-                if xvel > 0:
-                    self.rect.right = p.rect.left
-                if xvel < 0:
-                    self.rect.left = p.rect.right
-                if yvel > 0:
-                    self.rect.bottom = p.rect.top
-                    self.onGround = True
-                    self.isJumping = False
-                    self.stopAnim("Jump")
-                    self.yvel = 0
-                if yvel < 0:
-                    self.rect.top = p.rect.bottom
-                    self.yvel = 0
-        
+            if sprite.collide_rect(self, p):
+                if p.canCollide:
+                    if xvel > 0:
+                        self.rect.right = p.rect.left
+                    if xvel < 0:
+                        self.rect.left = p.rect.right
+                    if yvel > 0:
+                        self.rect.bottom = p.rect.top
+                        self.onGround = True
+                        self.isJumping = False
+                        self.stopAnim("Jump")
+                        self.yvel = 0
+                    if yvel < 0:
+                        self.rect.top = p.rect.bottom
+                        self.yvel = 0
+                elif p.code == "^" and not self.inv:
+                    self.getDamaged()
+
+
+    def getDamaged(self):
+        self.addHealth(-1)
+        self.inv = True
+        self.invTick = time.get_ticks()
+        self.isHurt = True
+        self.hurtTick = time.get_ticks()
+        self.yvel = -7
+        self.xvel = 7 * directions[getOppositeDirection(self.facing)]
+
     def checkDamage(self, enemies):
         for e in enemies:
             if sprite.collide_rect(self, e) and not self.inv and not e.health <= 0:
-                self.addHealth(-1)
-                self.inv = True
-                self.invTick = time.get_ticks()
-                self.isHurt = True
-                self.hurtTick = time.get_ticks()
-                self.yvel = -7
-                self.xvel = 7 * directions[getOppositeDirection(self.facing)]
+                self.getDamaged()
             if sprite.collide_rect(self.attack, e) and self.isAttacking and not e.inv and not e.health <= 0:
                 e.addHealth(-1)
                 e.inv = True
@@ -278,7 +287,8 @@ class Background(sprite.Sprite):
 class Platform(sprite.Sprite):
     def __init__(self, x, y, tile):
         sprite.Sprite.__init__(self)
-        self.canCollide = True if tile != "-" and tile != "e" else False
+        self.canCollide = True if tile not in cantCollide else False
+        self.code = tile
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image.fill(Color(PLATFORM_COLOR))
         self.image = transform.scale(get_sprite(tile_sheet, tiles[tile][0], tiles[tile][1], sprite_params["Tile"][0], sprite_params["Tile"][1]),

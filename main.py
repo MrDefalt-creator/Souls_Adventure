@@ -47,14 +47,14 @@ level = [
        "                                                                                                              ",
        "                                                                                                              ",
        "                                                                                                              ",
-       "                             6                                                                                ",
        "                                                                                                              ",
-       "                        6                                                                                     ",
        "                                                                                                              ",
-       "                 6                                                                                            ",
        "                                                                                                              ",
-       "            7                                                                                                 ",
-       "   -      e 8                e                     e                                                          ",
+       "                                                                                                              ",
+       "                 123                                                                                          ",
+       "                                                                                                              ",
+       "           7                                                                                                  ",
+       "   -       8        e          ^^^                      e                                                     ",
        "12222222222222222222222222222222222222223     1222222222222222222222222222222222222222222222222222222222222223",
        "40000000000000000000000000000000000000005     4000000000000000000000000000000000000000000000000000000000000005"]
 
@@ -134,10 +134,6 @@ while running:
         camera.apply(BackGround3.backs[bg], 1.5)
         screen.blit(BackGround3.backs["Image"], BackGround3.backs[bg].rect)
 
-    for e in entities:
-        camera.apply(e)
-        screen.blit(e.image, e.rect)
-
     camera.apply(hero)
     camera.update(hero)
 
@@ -156,6 +152,10 @@ while running:
     if hero.isVisible:
         hero.draw(screen)
     #draw.rect(screen, (255,0,0), hero.attack.rect, 3)
+
+    for e in entities:
+        camera.apply(e)
+        screen.blit(e.image, e.rect)
 
     pygame.display.flip()
 

@@ -1,12 +1,18 @@
+import time
+
 import pygame
 from pygame import *
 from mainclasses import *
 from spritehandler import *
 from animator import *
+from random import *
+
+MOVE_SPEED = 2
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, charType, spawn):
         sprite.Sprite.__init__(self)
+        self.tick = time.get_ticks() + randint(0, 12000)
         self.xvel = 0
         self.yvel = 0
         self.spawn = spawn
@@ -58,6 +64,11 @@ class Enemy(pygame.sprite.Sprite):
         if not self.onGround:
             self.yvel += GRAVITY
 
+        if not self.inv and not self.health <= 0:
+            self.do_something()
+        else:
+            self.xvel = 0
+
         self.onGround = False
         self.rect.y += self.yvel
         self.collide(0, self.yvel, platforms)
@@ -65,8 +76,6 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x += self.xvel
         self.collide(self.xvel, 0, platforms)
 
-        print(self.health)
-    
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
             if sprite.collide_rect(self, p) and p.canCollide:
@@ -101,4 +110,23 @@ class Enemy(pygame.sprite.Sprite):
 
         # Рисуем спрайт поверх хитбокса
         screen.blit(self.image, (sprite_x, sprite_y))
-    
+
+    def do_something(self):
+        diff = time.get_ticks() - self.tick
+        match (diff // 3000) % 4:
+            case 0:
+                self.xvel = -MOVE_SPEED
+                self.facing = "Left"
+                self.playAnim("Walk")
+            case 1:
+                self.xvel = 0
+                self.facing = "Left"
+                self.playAnim("Idle")
+            case 2:
+                self.xvel = MOVE_SPEED
+                self.facing = "Right"
+                self.playAnim("Walk")
+            case 3:
+                self.xvel = 0
+                self.facing = "Right"
+                self.playAnim("Idle")
