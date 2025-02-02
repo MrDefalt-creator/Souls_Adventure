@@ -32,6 +32,7 @@ PLATFORM_WIDTH = 52
 PLATFORM_HEIGHT = PLATFORM_WIDTH
 PLATFORM_COLOR = "#008000"
 
+def clamp(n, smallest, largest): return max(smallest, min(n, largest))
 
 class Camera(object):
     def __init__(self, camera_func, width, height):
@@ -63,6 +64,8 @@ class Player(sprite.Sprite):
         self.xvel = 0
         self.yvel = 0
         self.spawn = spawn
+        self.maxhealth = 4
+        self.health = self.maxhealth
         self.onGround = False
         self.Animations = {
             "Left": {},
@@ -99,19 +102,27 @@ class Player(sprite.Sprite):
             self.isJumping = True
             self.playAnim("Jump")
 
-        if left and not self.isAttacking:
-            self.xvel = -MOVE_SPEED
-            self.facing = "Left"
-            self.playAnim("Walk")
+        if left:
+            if self.isAttacking:
+                if self.isJumping:
+                    self.xvel = -MOVE_SPEED
+                else:
+                    self.xvel = 0
+            else:
+                self.xvel = -MOVE_SPEED
+                self.facing = "Left"
+                self.playAnim("Walk")
 
-        if right and not self.isAttacking:
-            self.xvel = MOVE_SPEED
-            self.image = transform.scale(
-                get_sprite(sheets["Warrior"], warrior[0][0], warrior[0][1], sprite_params["Warrior"][0], sprite_params["Warrior"][1], False),
-                (self.sprite_width, self.sprite_height)
-            )
-            self.facing = "Right"
-            self.playAnim("Walk")
+        if right:
+            if self.isAttacking:
+                if self.isJumping:
+                    self.xvel = MOVE_SPEED
+                else:
+                    self.xvel = 0
+            else:
+                self.xvel = MOVE_SPEED
+                self.facing = "Right"
+                self.playAnim("Walk")
 
         if not (left or right) and not self.isAttacking:
             self.xvel = 0
@@ -145,6 +156,7 @@ class Player(sprite.Sprite):
 
         if self.rect.y > 700:
             self.respawn()
+            self.addHealth(-1)
 
     def playAnim(self, name):
         self.Animations[self.facing][name].play()
@@ -155,6 +167,9 @@ class Player(sprite.Sprite):
     def respawn(self):
         self.rect.x = self.spawn.rect.x
         self.rect.y = self.spawn.rect.y
+
+    def addHealth(self, diff):
+        self.health = clamp(self.health + diff, 0, self.maxhealth)
 
     def collide(self, xvel, yvel, platforms):
         for p in platforms:

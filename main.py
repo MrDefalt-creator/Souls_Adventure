@@ -3,6 +3,7 @@ import pygame
 from pygame import *
 from mainclasses import *
 from menu import *
+from GUI import GUI
 from InfiniteScrolling import Scroller
 import random
 
@@ -81,11 +82,14 @@ BackGround3 = Scroller(BackGround3, hero)
 
 camera = Camera(camera_configure, total_level_width, total_level_height)
 
+healthbar = GUI(hero, camera)
+
 # Main loop
 
 while running:
     timer.tick(60)
     # Look at every event in the queue
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -132,7 +136,10 @@ while running:
 
     camera.apply(hero)
     camera.update(hero)
-    hero.update(left, right, up, platforms, z) # передвижение
+    healthbar.update()
+    hero.update(left, right, up, platforms, z)  # передвижение
+    camera.apply(healthbar, 10000)
+    screen.blit(healthbar.image, healthbar.rect)
 
     hero.draw(screen)
 
