@@ -110,6 +110,10 @@ while running:
     
     screen.fill([255, 255, 255])
 
+    BackGround1.update()
+    BackGround2.update()
+    BackGround3.update()
+
     for bg in ["Left", "Center", "Right"]:
         camera.apply(BackGround1.backs[bg], 6)
         screen.blit(BackGround1.backs["Image"], BackGround1.backs[bg].rect)
@@ -131,10 +135,6 @@ while running:
     hero.update(left, right, up, platforms, z) # передвижение
 
     hero.draw(screen)
-
-    BackGround1.update()
-    BackGround2.update()
-    BackGround3.update()
 
     pygame.display.update()
 
