@@ -104,7 +104,7 @@ class Player(sprite.Sprite):
 
         if left:
             if self.isAttacking:
-                if self.isJumping:
+                if self.isJumping and self.facing == "Left":
                     self.xvel = -MOVE_SPEED
                 else:
                     self.xvel = 0
@@ -115,7 +115,7 @@ class Player(sprite.Sprite):
 
         if right:
             if self.isAttacking:
-                if self.isJumping:
+                if self.isJumping and self.facing == "Right":
                     self.xvel = MOVE_SPEED
                 else:
                     self.xvel = 0
