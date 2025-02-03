@@ -58,7 +58,7 @@ class Camera(object):
         self.state = Rect(0, 0, width, height)
 
     def apply(self, target, multiplier = 1):
-        return target.rect.move_ip(self.state.x / multiplier, self.state.y)
+        target.rect.move_ip(self.state.x / multiplier, self.state.y)
 
     def update(self, target):
         self.state = self.camera_func(self.state, target.rect)
@@ -219,13 +219,11 @@ class Player(sprite.Sprite):
     def stopAnim(self, name):
         self.Animations[self.facing][name].stop()
 
-    def respawn(self, over=False):
-        if over:
-            self.rect.x = self.beginning.rect.x
-            self.rect.y = self.beginning.rect.y
-        else:
-            self.rect.x = self.spawn.rect.x
-            self.rect.y = self.spawn.rect.y
+    def respawn(self):
+        self.rect.x = self.spawn.rect.x
+        self.rect.y = self.spawn.rect.y
+        self.inv = True
+        self.invTick = time.get_ticks()
 
     def addHealth(self, diff):
         self.health = clamp(self.health + diff, 0, self.maxhealth)

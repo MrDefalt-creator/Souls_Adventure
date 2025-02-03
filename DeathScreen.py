@@ -1,6 +1,7 @@
 import pygame
 import sys
 from mainclasses import *
+
 # Константы
 BG_COLOR = (30, 30, 30)
 WHITE = (255, 255, 255)  # Возвращаем белый цвет для текста
@@ -21,7 +22,7 @@ def draw_text(text, x, y, color, screen):
     return rect
 
 # Функция главного меню
-def death_screen(screen, hero):
+def death_screen(screen):
     # Загрузка статичных слоев фона
     bg1 = pygame.image.load('Assets/Woods/background/layer1.png').convert_alpha()
     bg2 = pygame.image.load('Assets/Woods/background/layer2.png').convert_alpha()
@@ -69,8 +70,6 @@ def death_screen(screen, hero):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if retry_button.collidepoint(mx, my):
-                    hero.respawn(True)
-                    hero.health = 4
                     return # Запуск игры
                 if exit_button.collidepoint(mx, my):
                     pygame.quit()

@@ -1,176 +1,184 @@
-# Import the pygame module
 import pygame
 from pygame import *
+
+from DeathScreen import death_screen
 from mainclasses import *
 from menu import *
+import Heal
 from Heal import Items
 from GUI import GUI
 from Enemy import Enemy
 from InfiniteScrolling import Scroller
 import random
 import DeathScreen
-# Initialize pygame
 
-pygame.init()
-
-# Define constants for the screen width and height
-# Create the screen object
-# The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.SCALED, vsync=1)
 pygame.display.set_caption("The Souls Adventure")
 
-CameraX, CameraY = 0, 0
+def main():
+    # Initialize pygame
+
+    pygame.init()
+
+    # Define constants for the screen width and height
+    # Create the screen object
+    # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
+
+    CameraX, CameraY = 0, 0
 
 
-running = True
+    running = True
 
-BackGround1 = Background('Assets/Woods/background/layer1.png', [0,0])
-BackGround2 = Background('Assets/Woods/background/layer2.png', [0,0])
-BackGround3 = Background('Assets/Woods/background/layer3.png', [0,0])
+    BackGround1 = Background('Assets/Woods/background/layer1.png', [0,0])
+    BackGround2 = Background('Assets/Woods/background/layer2.png', [0,0])
+    BackGround3 = Background('Assets/Woods/background/layer3.png', [0,0])
 
-num_columns = tile_sheet.get_width()
-num_rows = tile_sheet.get_height()
+    num_columns = tile_sheet.get_width()
+    num_rows = tile_sheet.get_height()
 
-# Вызов меню перед игрой
-main_menu(screen)
+    # Вызов меню перед игрой
 
- # создаем героя по (x,y) координатам
+     # создаем героя по (x,y) координатам
 
-left = right = False
-up = False
-z = False
+    left = right = False
+    up = False
+    z = False
 
-entities = pygame.sprite.Group() # Все объекты
-platforms = [] # то, во что мы будем врезаться или опираться
-entities.add()
+    entities = pygame.sprite.Group() # Все объекты
+    platforms = [] # то, во что мы будем врезаться или опираться
+    entities.add()
 
-level = [
-       "                                                                                                                                 8                                                                                                                                                                      70000000000000007                                                                                                                                                                                                                                                                                                                                        ",
-       "                                                                                                                                 8                                                                                                                                                                      12222222222222223                                                                                                                                                                                                                                                                                                                                        ",
-       "                                                                                                                                 8                                                                                                                                                   * e  *    ^  ^                                                                                                                                                                                                                                                                                                                                              ",
-       "                                                                                                                                 8                                                                                                                                                  1222223  1222223                                                                                                                                                                                                                                                                                                                                                   ",
-       "                                                                                                                                 8                                                                                                                                             13                                                                                                                                                                                                                                                                                                                                                             ",
-       "                                                                                                                                 8   #       *  e *                                                                                                                                                     ^  ^  ^  ^  ^  ^  ^^     ^^ * e   *                                                                                                                                                                                                                                                                                                                                   ",
-       "                                                                                                                    123          8   67      122223                                                                                                                          7                         12222222222222222222222222222222223             12222222222222222222222222222223                                                                                                                                                                                                                                                                                                                          ",
-       "                                                                                                            ^                    8    8                                                                                                                                #          ^  ^  ^  ^                                                  123                                                                                                                                                                                                                                                                                                                          ",
-       "                 1223                                                                                    12223                   86   8                     ^                                                         12223                                   *e *    122222222222222222222222                                                                                                                                                                                                                                                                                                                                                                           ",
-       "                                                                  ^^                            ^^                               8    8                    123             *  e*                                #^                                      ^^   12223                               * e   *                                    *  e*   7                                                                                                                                                                                                                                                                                                                             ",
-       "             7                                                  1223                          122223                                 68                            ^  ^^   12223                                13                             *e *   1223                                       122222223                   ^  ^  ^  7   12222222223                                                                                                                                                                                                                                                                                                                           ",
-       "         -   8         e        ^^^    #    123                        *        ^        * #           *     e    *^^^                8                            12223                   ^^^^*    e       *   45  123                       12223                                                             ^^  ^^      12222222223                                                                                                                                                                                                                                                                                                                         ",
-       "122222222223 8 12222222222222222222222223          * e   *7           ^^  *   123    *e  ^ 7           1222222222222222222222222223   8                                           12222222222222222222222222223 45             ^^^     123                                                                   122222222223                                                                                                                                                                                                                                                                                                                                   ",
-       "400000000005 8 40000000000000000000000005          12222223           12223          1222223           4000000000000000000000000005   8                                           40000000000000000000000000005 45            12223                                                                                                                                                                                                                                                                                                                                                                                                           "]
+    level = [
+           "                                                                                                                                 8                                                                                                                                                                      70000000000000007                                                                                                                                                                                                                                                                                                                     ",
+           "                                                                                                                                 8                                                                                                                                                                      12222222222222223                                                                                                                                                                                                                                                                                                                     ",
+           "                                                                                                                                 8                                                                                                                                                   * e  *    ^  ^                                                                                                                                                                                                                                                                                                                                           ",
+           "                                                                                                                                 8                                                                                                                                                  1222223  1222223                                                                                                                                                                                                                                                                                                                                          ",
+           "                                                                                                                                 8                                                                                                                                             13                                                                                                                                                                                                                                                                                                                                                             ",
+           "                                                                                                                                 8   #       *  e *                                                                                                                                                     ^  ^  ^  ^  ^  ^  ^^     ^^ * e   *                                                                                                                                                                                                                                                                                                   ",
+           "                                                                                                                    123          8   67      122223                                                                                                                          7                         12222222222222222222222222222222223             12222222222222222222222222222223                                                                                                                                                                                                                                                       ",
+           "                                                                                                            ^                    8    8                                                                                                                                #          ^  ^  ^  ^                                                  123                                                                                                                                                                                                                                                                                             ",
+           "                 1223                                                                                    12223                   86   8                     ^                                                        122223                                   *e *    122222222222222222222222                                                                                                                                                                                                                                                                                                                                                ",
+           "                                                                  ^^                            ^^                               8    8                    123             *  e*                                #^                                      ^^   12223                               * e   *                                    *  e*   7                                                                                                                                                                                                                                                                                         ",
+           "             7                                                  1223                          122223                                 68                            ^  ^^   12223                                13                             *e *   1223                                       122222223                   ^  ^  ^  7   12222222223                                                                                                                                                                                                                                                                                         ",
+           "         -   8         e        ^^^    #    123                        *        ^        * #           *     e    *^^^                8                            12223                   ^^^^*    e       *   45  123                       12223                                                             ^^  ^^      12222222223                                                                                                                                                                                                                                                                                                       ",
+           "122222222223 8 12222222222222222222222223          * e   *7           ^^  *   123    *e  ^ 7           1222222222222222222222222223   8                                           12222222222222222222222222223 45             ^^^     123                                                                   122222222223                                                                                                                                                                                                                                                                                                                     ",
+           "400000000005 8 40000000000000000000000005          12222223           12223          1222223           4000000000000000000000000005   8                                           40000000000000000000000000005 45            12223                                                                                                                                                                                                                                                                                                                                                                                                           "]
 
-timer = pygame.time.Clock()
-enemies = []
-x=y=0 # координатыz
-for row in level: # вся строка
-    for col in row: # каждый символ
-        if col != " ":
-            pf = Platform(x, y, col)
-            entities.add(pf)
-            platforms.append(pf)
-            if col == "-":
-                hero = Player(x, y, "Warrior", pf)
-            elif col == "e":
-                enemies.append(Enemy(x,y, "Skeleton", pf))
-            #создаем блок, заливаем его цветом и рисеум его
-                    
-        x += PLATFORM_WIDTH #блоки платформы ставятся на ширине блоков
-    y += PLATFORM_HEIGHT    #то же самое и с высотой
-    x = 0         
+    timer = pygame.time.Clock()
+    enemies = []
+    x=y=0 # координатыz
+    for row in level: # вся строка
+        for col in row: # каждый символ
+            if col != " ":
+                pf = Platform(x, y, col)
+                entities.add(pf)
+                platforms.append(pf)
+                if col == "-":
+                    hero = Player(x, y, "Warrior", pf)
+                elif col == "e":
+                    enemies.append(Enemy(x,y, "Skeleton", pf))
+                #создаем блок, заливаем его цветом и рисеум его
 
-total_level_width  = len(level[0])*PLATFORM_WIDTH # Высчитываем фактическую ширину уровня
-total_level_height = len(level)*PLATFORM_HEIGHT
+            x += PLATFORM_WIDTH #блоки платформы ставятся на ширине блоков
+        y += PLATFORM_HEIGHT    #то же самое и с высотой
+        x = 0
 
-BackGround1 = Scroller(BackGround1, hero)
-BackGround2 = Scroller(BackGround2, hero)
-BackGround3 = Scroller(BackGround3, hero)
+    total_level_width  = len(level[0])*PLATFORM_WIDTH # Высчитываем фактическую ширину уровня
+    total_level_height = len(level)*PLATFORM_HEIGHT
 
-camera = Camera(camera_configure, total_level_width, total_level_height)
+    BackGround1 = Scroller(BackGround1, hero)
+    BackGround2 = Scroller(BackGround2, hero)
+    BackGround3 = Scroller(BackGround3, hero)
 
-healthbar = GUI(hero, camera)
+    camera = Camera(camera_configure, total_level_width, total_level_height)
 
-# Main loop
-while running:
-    timer.tick(60)
-    # Look at every event in the queue
+    healthbar = GUI(hero, camera)
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == KEYDOWN and event.key == K_UP:
-            up = True
-        if event.type == KEYDOWN and event.key == K_LEFT:
-            left = True
-        if event.type == KEYDOWN and event.key == K_RIGHT:
-            right = True
-        if event.type == KEYDOWN and event.key == K_f:
-            z = True
+    # Main loop
+    while running:
+        timer.tick(60)
+        # Look at every event in the queue
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == KEYDOWN and event.key == K_UP:
+                up = True
+            if event.type == KEYDOWN and event.key == K_LEFT:
+                left = True
+            if event.type == KEYDOWN and event.key == K_RIGHT:
+                right = True
+            if event.type == KEYDOWN and event.key == K_f:
+                z = True
 
 
-        if event.type == KEYUP and event.key == K_UP:
-            up = False
-        if event.type == KEYUP and event.key == K_RIGHT:
-            right = False
-        if event.type == KEYUP and event.key == K_LEFT:
-            left = False
-        if event.type == KEYUP and event.key == K_f:
-            z = False
-    
-    screen.fill([255, 255, 255])
+            if event.type == KEYUP and event.key == K_UP:
+                up = False
+            if event.type == KEYUP and event.key == K_RIGHT:
+                right = False
+            if event.type == KEYUP and event.key == K_LEFT:
+                left = False
+            if event.type == KEYUP and event.key == K_f:
+                z = False
 
-    BackGround1.update()
-    BackGround2.update()
-    BackGround3.update()
+        screen.fill([255, 255, 255])
 
-    for bg in ["Left", "Center", "Right"]:
-        camera.apply(BackGround1.backs[bg], 6)
-        screen.blit(BackGround1.backs["Image"], BackGround1.backs[bg].rect)
+        BackGround1.update()
+        BackGround2.update()
+        BackGround3.update()
 
-    for bg in ["Left", "Center", "Right"]:
-        camera.apply(BackGround2.backs[bg], 3)
-        screen.blit(BackGround2.backs["Image"], BackGround2.backs[bg].rect)
+        for bg in ["Left", "Center", "Right"]:
+            camera.apply(BackGround1.backs[bg], 6)
+            screen.blit(BackGround1.backs["Image"], BackGround1.backs[bg].rect)
 
-    for bg in ["Left", "Center", "Right"]:
-        camera.apply(BackGround3.backs[bg], 1.5)
-        screen.blit(BackGround3.backs["Image"], BackGround3.backs[bg].rect)
+        for bg in ["Left", "Center", "Right"]:
+            camera.apply(BackGround2.backs[bg], 3)
+            screen.blit(BackGround2.backs["Image"], BackGround2.backs[bg].rect)
 
-    camera.apply(hero)
-    camera.update(hero)
+        for bg in ["Left", "Center", "Right"]:
+            camera.apply(BackGround3.backs[bg], 1.5)
+            screen.blit(BackGround3.backs["Image"], BackGround3.backs[bg].rect)
 
-    healthbar.update()
+        camera.apply(hero)
+        camera.update(hero)
 
-    if hero.health <= 0:
-        DeathScreen.death_screen(screen,hero)
-        up = False
-        left = False
-        right = False
-        z = False
-    for e in enemies:
-        camera.apply(e)
-        e.update(platforms)
-        e.draw(screen)
+        healthbar.update()
 
-    hero.update(left, right, up, platforms, z, enemies)
+        if hero.health <= 0:
+            for e in Items:
+                e.used = True
+            return screen
 
-    camera.apply(healthbar, 10000)
-
-    for e in Items:
-        if not e.used:
-            e.update()
+        for e in enemies:
+            camera.apply(e)
+            e.update(platforms)
             e.draw(screen)
 
-    if hero.isVisible:
-        hero.draw(screen)
-    #draw.rect(screen, (255,0,0), hero.attack.rect, 3)
+        hero.update(left, right, up, platforms, z, enemies)
 
-    for e in entities:
-        camera.apply(e)
-        screen.blit(e.image, e.rect)
+        camera.apply(healthbar, 10000)
 
-    screen.blit(healthbar.image, healthbar.rect)
+        for e in Items:
+            if not e.used:
+                e.update()
+                e.draw(screen)
 
-    pygame.display.flip()
+        if hero.isVisible:
+            hero.draw(screen)
+        #draw.rect(screen, (255,0,0), hero.attack.rect, 3)
 
+        for e in entities:
+            camera.apply(e)
+            screen.blit(e.image, e.rect)
 
-pygame.quit()
+        screen.blit(healthbar.image, healthbar.rect)
+
+        pygame.display.flip()
+
+    pygame.quit()
+
+main_menu(screen)
+
+while True:
+    screen = main()
+    death_screen(screen)
