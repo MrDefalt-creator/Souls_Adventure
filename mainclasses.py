@@ -11,7 +11,7 @@ directions = {
     "Left": -1
 }
 
-cantCollide = ["-", "e", "^"]
+cantCollide = ["-", "e", "^", "*"]
 
 TYPICAL_ANIMS = {
     "Warrior": {
@@ -69,7 +69,7 @@ def camera_configure(camera, target_rect):
 
     l = max(-(camera.width - SCREEN_WIDTH), l)  # Не движемся дальше левой границы
     t = max((camera.height - SCREEN_HEIGHT), t)  # Не движемся дальше нижней границы
-    t = min(0, t)  # Не движемся дальше верхней границы
+    t = min(0, t + 100)  # Не движемся дальше верхней границы
 
     return Rect(l, t, w, h)
 

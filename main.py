@@ -15,7 +15,7 @@ pygame.init()
 # Create the screen object
 # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.SCALED, vsync=1)
-pygame.display.set_caption("The Epic Adventure")
+pygame.display.set_caption("The Souls Adventure")
 
 CameraX, CameraY = 0, 0
 
@@ -43,20 +43,20 @@ platforms = [] # то, во что мы будем врезаться или о�
 entities.add()
 
 level = [
-       "                                                                                                              ",
-       "                                                                                                              ",
-       "                                                                                                              ",
-       "                                                                                                              ",
-       "                                                                                                              ",
-       "                                                                                                              ",
-       "                                                                                                              ",
-       "                                                                                                              ",
-       "                 123                                                                                          ",
-       "                                                                                                              ",
-       "           7                                                                                                  ",
-       "   -       8        e          ^^^                      e                                                     ",
-       "12222222222222222222222222222222222222223     1222222222222222222222222222222222222222222222222222222222222223",
-       "40000000000000000000000000000000000000005     4000000000000000000000000000000000000000000000000000000000000005"]
+       "                                                                                                                                 8                                                                                                                                                                      70000000000000007                                                                                                                                                                                                                                                                                                                                        ",
+       "                                                                                                                                 8                                                                                                                                                                      12222222222222223                                                                                                                                                                                                                                                                                                                                        ",
+       "                                                                                                                                 8                                                                                                                                                   * e  *    ^  ^                                                                                                                                                                                                                                                                                                                                              ",
+       "                                                                                                                                 8                                                                                                                                                  1222223  1222223                                                                                                                                                                                                                                                                                                                                                   ",
+       "                                                                                                                                 8                                                                                                                                             13                                                                                                                                                                                                                                                                                                                                                             ",
+       "                                                                                                                                 8           *  e *                                                                                                                                                     ^  ^  ^  ^  ^  ^  ^^     ^^ * e   *                                                                                                                                                                                                                                                                                                                                   ",
+       "                                                                                                                    123          8   67      122223                                                                                                                          7                         12222222222222222222222222222222223             12222222222222222222222222222223                                                                                                                                                                                                                                                                                                                          ",
+       "                                                                                                            ^                    8    8                                                                                                                                           ^  ^  ^  ^                                                  123                                                                                                                                                                                                                                                                                                                          ",
+       "                 1223                                                                                    12223                   86   8                     ^                                                         12223                                   *e *    122222222222222222222222                                                                                                                                                                                                                                                                                                                                                                           ",
+       "                                                                  ^^                            ^^                               8    8                    123             *  e*                                 ^                                      ^^   12223                               * e   *                                    *  e*   7                                                                                                                                                                                                                                                                                                                             ",
+       "             7                                                  1223                          122223                                 68                            ^  ^^   12223                                13                             *e *   1223                                       122222223                   ^  ^  ^  7   12222222223                                                                                                                                                                                                                                                                                                                           ",
+       "             8         e        ^^^         123                        *        ^        *             *     e    *^^^                8                            12223                   ^^^^*    e       *   45  123                       12223                                                          * e  * ^^      12222222223                                                                                                                                                                                                                                                                                                                         ",
+       "122222222223 8 12222222222222222222222223          * e   *7           ^^  *   123    *e  ^ 7           1222222222222222222222222223   8                                           12222222222222222222222222234 45            -^^^     123                                                                   122222222223                                                                                                                                                                                                                                                                                                                                   ",
+       "400000000005 8 40000000000000000000000005          12222223           12223          1222223           4000000000000000000000000005   8                                           40000000000000000000000000045 45            12223                                                                                                                                                                                                                                                                                                                                                                                                           "]
 
 timer = pygame.time.Clock()
 enemies = []
@@ -103,7 +103,7 @@ while running:
             left = True
         if event.type == KEYDOWN and event.key == K_RIGHT:
             right = True
-        if event.type == KEYDOWN and event.key == K_z:
+        if event.type == KEYDOWN and event.key == K_f:
             z = True
 
 
@@ -113,7 +113,7 @@ while running:
             right = False
         if event.type == KEYUP and event.key == K_LEFT:
             left = False
-        if event.type == KEYUP and event.key == K_z:
+        if event.type == KEYUP and event.key == K_f:
             z = False
     
     screen.fill([255, 255, 255])
@@ -147,7 +147,6 @@ while running:
     hero.update(left, right, up, platforms, z, enemies)
 
     camera.apply(healthbar, 10000)
-    screen.blit(healthbar.image, healthbar.rect)
 
     if hero.isVisible:
         hero.draw(screen)
@@ -156,6 +155,8 @@ while running:
     for e in entities:
         camera.apply(e)
         screen.blit(e.image, e.rect)
+
+    screen.blit(healthbar.image, healthbar.rect)
 
     pygame.display.flip()
 

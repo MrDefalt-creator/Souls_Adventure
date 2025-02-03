@@ -78,18 +78,25 @@ class Enemy(pygame.sprite.Sprite):
 
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
-            if sprite.collide_rect(self, p) and p.canCollide:
-                if xvel > 0:
-                    self.rect.right = p.rect.left
-                if xvel < 0:
-                    self.rect.left = p.rect.right
-                if yvel > 0:
-                    self.rect.bottom = p.rect.top
-                    self.onGround = True
-                    self.yvel = 0
-                if yvel < 0:
-                    self.rect.top = p.rect.bottom
-                    self.yvel = 0
+            if sprite.collide_rect(self, p):
+                if p.canCollide:
+                    if xvel > 0:
+                        self.rect.right = p.rect.left
+                    if xvel < 0:
+                        self.rect.left = p.rect.right
+                    if yvel > 0:
+                        self.rect.bottom = p.rect.top
+                        self.onGround = True
+                        self.yvel = 0
+                    if yvel < 0:
+                        self.rect.top = p.rect.bottom
+                        self.yvel = 0
+                elif p.code == "*":
+                    p.tick = time.get_ticks()
+                    if xvel > 0:
+                        self.rect.right = p.rect.left
+                    if xvel < 0:
+                        self.rect.left = p.rect.right
 
     def playAnim(self, name):
         self.Animations[self.facing][name].play()
