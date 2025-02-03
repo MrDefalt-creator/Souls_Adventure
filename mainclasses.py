@@ -4,14 +4,16 @@ from pygame import *
 from spritehandler import *
 from types import SimpleNamespace as namespace
 from animator import *
+from Heal import Items
 import os
+import DeathScreen
 
 directions = {
     "Right": 1,
     "Left": -1
 }
 
-cantCollide = ["-", "e", "^", "*"]
+cantCollide = ["-", "e", "^", "*", "#"]
 
 TYPICAL_ANIMS = {
     "Warrior": {
@@ -85,6 +87,7 @@ class Player(sprite.Sprite):
         self.hurtTick = -1000
         self.invTick = -4000
         self.spawn = spawn
+        self.beginning = spawn
         self.maxhealth = 4
         self.health = self.maxhealth
         self.onGround = False
@@ -208,6 +211,7 @@ class Player(sprite.Sprite):
         self.attack.rect.centery = self.rect.centery
 
         self.checkDamage(enemies)
+        self.checkItems()
 
     def playAnim(self, name):
         self.Animations[self.facing][name].play()
@@ -215,9 +219,13 @@ class Player(sprite.Sprite):
     def stopAnim(self, name):
         self.Animations[self.facing][name].stop()
 
-    def respawn(self):
-        self.rect.x = self.spawn.rect.x
-        self.rect.y = self.spawn.rect.y
+    def respawn(self, over=False):
+        if over:
+            self.rect.x = self.beginning.rect.x
+            self.rect.y = self.beginning.rect.y
+        else:
+            self.rect.x = self.spawn.rect.x
+            self.rect.y = self.spawn.rect.y
 
     def addHealth(self, diff):
         self.health = clamp(self.health + diff, 0, self.maxhealth)
@@ -241,6 +249,8 @@ class Player(sprite.Sprite):
                         self.yvel = 0
                 elif p.code == "^" and not self.inv:
                     self.getDamaged()
+                elif p.code == "#":
+                    self.spawn = p
 
 
     def getDamaged(self):
@@ -251,17 +261,26 @@ class Player(sprite.Sprite):
         self.hurtTick = time.get_ticks()
         self.yvel = -7
         self.xvel = 7 * directions[getOppositeDirection(self.facing)]
+        
 
     def checkDamage(self, enemies):
         for e in enemies:
             if sprite.collide_rect(self, e) and not self.inv and not e.health <= 0:
                 self.getDamaged()
-            if sprite.collide_rect(self.attack, e) and self.isAttacking and not e.inv and not e.health <= 0:
+            if sprite.collide_rect(self.attack, e) and self.isAttacking and not e.inv and e.health > 0:
                 e.addHealth(-1)
                 e.inv = True
                 e.invTick = time.get_ticks()
                 e.isHurt = True
                 e.facing = getOppositeDirection(self.facing)
+                if e.health <= 0 and self.health < 4:
+                    e.spawnItem()
+            
+    def checkItems(self):
+        for i in Items:
+            if sprite.collide_rect(self, i) and not i.used:
+                i.used = True
+                self.addHealth(1)
 
 
     def draw(self, screen):

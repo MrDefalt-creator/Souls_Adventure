@@ -3,12 +3,14 @@ import pygame
 from pygame import *
 from mainclasses import *
 from menu import *
+from Heal import Items
 from GUI import GUI
 from Enemy import Enemy
 from InfiniteScrolling import Scroller
 import random
-
+import DeathScreen
 # Initialize pygame
+
 pygame.init()
 
 # Define constants for the screen width and height
@@ -48,15 +50,15 @@ level = [
        "                                                                                                                                 8                                                                                                                                                   * e  *    ^  ^                                                                                                                                                                                                                                                                                                                                              ",
        "                                                                                                                                 8                                                                                                                                                  1222223  1222223                                                                                                                                                                                                                                                                                                                                                   ",
        "                                                                                                                                 8                                                                                                                                             13                                                                                                                                                                                                                                                                                                                                                             ",
-       "                                                                                                                                 8           *  e *                                                                                                                                                     ^  ^  ^  ^  ^  ^  ^^     ^^ * e   *                                                                                                                                                                                                                                                                                                                                   ",
+       "                                                                                                                                 8   #       *  e *                                                                                                                                                     ^  ^  ^  ^  ^  ^  ^^     ^^ * e   *                                                                                                                                                                                                                                                                                                                                   ",
        "                                                                                                                    123          8   67      122223                                                                                                                          7                         12222222222222222222222222222222223             12222222222222222222222222222223                                                                                                                                                                                                                                                                                                                          ",
-       "                                                                                                            ^                    8    8                                                                                                                                           ^  ^  ^  ^                                                  123                                                                                                                                                                                                                                                                                                                          ",
+       "                                                                                                            ^                    8    8                                                                                                                                #          ^  ^  ^  ^                                                  123                                                                                                                                                                                                                                                                                                                          ",
        "                 1223                                                                                    12223                   86   8                     ^                                                         12223                                   *e *    122222222222222222222222                                                                                                                                                                                                                                                                                                                                                                           ",
-       "                                                                  ^^                            ^^                               8    8                    123             *  e*                                 ^                                      ^^   12223                               * e   *                                    *  e*   7                                                                                                                                                                                                                                                                                                                             ",
+       "             -                                                    ^^                            ^^                               8    8                    123             *  e*                                #^                                      ^^   12223                               * e   *                                    *  e*   7                                                                                                                                                                                                                                                                                                                             ",
        "             7                                                  1223                          122223                                 68                            ^  ^^   12223                                13                             *e *   1223                                       122222223                   ^  ^  ^  7   12222222223                                                                                                                                                                                                                                                                                                                           ",
-       "             8         e        ^^^         123                        *        ^        *             *     e    *^^^                8                            12223                   ^^^^*    e       *   45  123                       12223                                                          * e  * ^^      12222222223                                                                                                                                                                                                                                                                                                                         ",
-       "122222222223 8 12222222222222222222222223          * e   *7           ^^  *   123    *e  ^ 7           1222222222222222222222222223   8                                           12222222222222222222222222234 45            -^^^     123                                                                   122222222223                                                                                                                                                                                                                                                                                                                                   ",
-       "400000000005 8 40000000000000000000000005          12222223           12223          1222223           4000000000000000000000000005   8                                           40000000000000000000000000045 45            12223                                                                                                                                                                                                                                                                                                                                                                                                           "]
+       "             8         e        ^^^    #    123                        *        ^        * #           *     e    *^^^                8                            12223                   ^^^^*    e       *   45  123                       12223                                                             ^^  ^^      12222222223                                                                                                                                                                                                                                                                                                                         ",
+       "122222222223 8 12222222222222222222222223          * e   *7           ^^  *   123    *e  ^ 7           1222222222222222222222222223   8                                           12222222222222222222222222223 45             ^^^     123                                                                   122222222223                                                                                                                                                                                                                                                                                                                                   ",
+       "400000000005 8 40000000000000000000000005          12222223           12223          1222223           4000000000000000000000000005   8                                           40000000000000000000000000005 45            12223                                                                                                                                                                                                                                                                                                                                                                                                           "]
 
 timer = pygame.time.Clock()
 enemies = []
@@ -89,7 +91,6 @@ camera = Camera(camera_configure, total_level_width, total_level_height)
 healthbar = GUI(hero, camera)
 
 # Main loop
-
 while running:
     timer.tick(60)
     # Look at every event in the queue
@@ -139,6 +140,12 @@ while running:
 
     healthbar.update()
 
+    if hero.health <= 0:
+        DeathScreen.death_screen(screen,hero)
+        up = False
+        left = False
+        right = False
+        z = False
     for e in enemies:
         camera.apply(e)
         e.update(platforms)
@@ -147,6 +154,11 @@ while running:
     hero.update(left, right, up, platforms, z, enemies)
 
     camera.apply(healthbar, 10000)
+
+    for e in Items:
+        if not e.used:
+            e.update()
+            e.draw(screen)
 
     if hero.isVisible:
         hero.draw(screen)
@@ -159,5 +171,6 @@ while running:
     screen.blit(healthbar.image, healthbar.rect)
 
     pygame.display.flip()
+
 
 pygame.quit()

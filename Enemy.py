@@ -5,6 +5,7 @@ from pygame import *
 from mainclasses import *
 from spritehandler import *
 from animator import *
+from Heal import Heal
 from random import *
 
 MOVE_SPEED = 2
@@ -106,6 +107,9 @@ class Enemy(pygame.sprite.Sprite):
     
     def addHealth(self, diff):
         self.health = clamp(self.health + diff, 0, self.maxhealth)
+
+    def spawnItem(self):
+        Heal(self)
 
     def draw(self, screen):
         # Рисуем хитбокс (для отладки)

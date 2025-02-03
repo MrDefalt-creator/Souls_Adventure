@@ -5,7 +5,8 @@ from mainclasses import *
 BG_COLOR = (30, 30, 30)
 WHITE = (255, 255, 255)  # Возвращаем белый цвет для текста
 HIGHLIGHT = (200, 200, 200)
-
+SCREEN_WIDTH = 1280
+SCREEN_HEIGHT = 720
 # Инициализация Pygame
 pygame.init()
 
@@ -20,7 +21,7 @@ def draw_text(text, x, y, color, screen):
     return rect
 
 # Функция главного меню
-def main_menu(screen):
+def death_screen(screen, hero):
     # Загрузка статичных слоев фона
     bg1 = pygame.image.load('Assets/Woods/background/layer1.png').convert_alpha()
     bg2 = pygame.image.load('Assets/Woods/background/layer2.png').convert_alpha()
@@ -41,18 +42,35 @@ def main_menu(screen):
         screen.blit(bg2, (0, 0))  # Второй слой фона
         screen.blit(bg3, (0, 0))  # Третий слой фона
 
-        # Отрисовка кнопок с увеличенным отступом и белым текстом
-        play_button = draw_text("Играть", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 80,  # Отступ больше
-                                WHITE if SCREEN_WIDTH // 3 < mx < SCREEN_WIDTH * 2 / 3 and SCREEN_HEIGHT // 2 - 105 < my < SCREEN_HEIGHT // 2 - 55 else HIGHLIGHT, screen)
-        exit_button = draw_text("Выход", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 80,  # Отступ больше
-                                WHITE if SCREEN_WIDTH // 3 < mx < SCREEN_WIDTH * 2 / 3 and SCREEN_HEIGHT // 2 + 55 < my < SCREEN_HEIGHT // 2 + 105 else HIGHLIGHT, screen)
+# Заголовок чуть выше
+        draw_text("Вы погибли", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 200, HIGHLIGHT, screen)
+
+        # Кнопка "Попробовать снова" ближе к центру
+        retry_button = draw_text(
+            "Попробовать снова",
+            SCREEN_WIDTH // 2,
+            SCREEN_HEIGHT // 2 - 80,
+            WHITE if SCREEN_WIDTH // 3 < mx < SCREEN_WIDTH * 2 / 3 and SCREEN_HEIGHT // 2 - 105 < my < SCREEN_HEIGHT // 2 - 55 else HIGHLIGHT,
+            screen
+        )
+
+        # Кнопка "Выход" ещё ниже
+        exit_button = draw_text(
+            "Выход",
+            SCREEN_WIDTH // 2,
+            SCREEN_HEIGHT // 2 + 80,
+            WHITE if SCREEN_WIDTH // 3 < mx < SCREEN_WIDTH * 2 / 3 and SCREEN_HEIGHT // 2 + 55 < my < SCREEN_HEIGHT // 2 + 105 else HIGHLIGHT,
+            screen
+        )
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if play_button.collidepoint(mx, my):
+                if retry_button.collidepoint(mx, my):
+                    hero.respawn(True)
+                    hero.health = 4
                     return # Запуск игры
                 if exit_button.collidepoint(mx, my):
                     pygame.quit()
