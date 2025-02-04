@@ -1,16 +1,13 @@
 import pygame
 from pygame import *
 
-from DeathScreen import death_screen
+from EndScreen import death_screen, win_screen
 from mainclasses import *
 from menu import *
-import Heal
 from Heal import Items
 from GUI import GUI
 from Enemy import Enemy
 from InfiniteScrolling import Scroller
-import random
-import DeathScreen
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.SCALED, vsync=1)
 pygame.display.set_caption("The Souls Adventure")
@@ -23,9 +20,6 @@ def main():
     # Define constants for the screen width and height
     # Create the screen object
     # The size is determined by the constant SCREEN_WIDTH and SCREEN_HEIGHT
-
-    CameraX, CameraY = 0, 0
-
 
     running = True
 
@@ -54,7 +48,7 @@ def main():
            "                                                                                                                                 8                                                                                                                                                   * e  *    ^  ^                                                                            4      5                                                                                                                                                                                                                                                       ",
            "                                                                                                                                 8                                                                                                                                                  <=====>  <=====>                                                   q                       4      5                                                                                                                                                                                                                                                       ",
            "                                                                                                                                 8                                                                                                                                             <>                                                                      a                       q      5                                                                                                                                                                                                                                                       ",
-           "                                                                                                                                 8   #       *  e *                                                                                                                                                     ^  ^  ^  ^  ^  ^  ^^     ^^ * e   *            z                       z      5                                                                                                                                                                                                                                                       ",
+           "                                                                                                                                 8   #       *  e *                                                                                                                                                     ^  ^  ^  ^  ^  ^  ^^     ^^ * e   *            z                       z  !   5                                                                                                                                                                                                                                                       ",
            "                                                                                                                   <=>           8   67      122223                        q                                                                                                 6                         <=================================>             12222222222222222222222222222225                                                                                                                                                                                                                                                       ",
            "                                              q                                                             ^                    8    8      400005                        a                                                                                           #          ^  ^  ^  ^                                                  <=>      40000000000000000000000000000005                                                                                                                                                                                                                                                       ",
            "                 <==>                         a                                                          <===>                   86   8      400005         ^              a                                         <====>            q                      *e *    122222222222222222222223                                                         40000000000000000000000000000005                                                                                                                                                                                                                                                       ",
@@ -147,7 +141,7 @@ def main():
         if hero.health <= 0:
             for e in Items:
                 e.used = True
-            return screen
+            return screen, False
 
         for e in enemies:
             camera.apply(e)
@@ -165,6 +159,9 @@ def main():
 
         if hero.isVisible:
             hero.draw(screen)
+
+        if hero.won:
+            return screen, True
         #draw.rect(screen, (255,0,0), hero.attack.rect, 3)
 
         for e in entities:
@@ -181,5 +178,8 @@ def main():
 main_menu(screen)
 
 while True:
-    screen = main()
-    death_screen(screen)
+    screen, win = main()
+    if win:
+        win_screen(screen)
+    else:
+        death_screen(screen)

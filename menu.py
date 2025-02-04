@@ -4,7 +4,7 @@ from mainclasses import *
 # Константы
 BG_COLOR = (30, 30, 30)
 WHITE = (255, 255, 255)  # Возвращаем белый цвет для текста
-HIGHLIGHT = (200, 200, 200)
+HIGHLIGHT = (0,0,0)
 
 # Инициализация Pygame
 pygame.init()

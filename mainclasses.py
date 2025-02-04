@@ -6,14 +6,14 @@ from types import SimpleNamespace as namespace
 from animator import *
 from Heal import Items
 import os
-import DeathScreen
+import EndScreen
 
 directions = {
     "Right": 1,
     "Left": -1
 }
 
-cantCollide = ["-", "e", "^", "*", "#"]
+cantCollide = ["-", "e", "^", "*", "#", "!"]
 
 destructable = ["q", "a", "z"]
 
@@ -90,6 +90,7 @@ class Player(sprite.Sprite):
         self.invTick = -4000
         self.spawn = spawn
         self.beginning = spawn
+        self.won = False
         self.maxhealth = 4
         self.health = self.maxhealth
         self.onGround = False
@@ -248,6 +249,8 @@ class Player(sprite.Sprite):
                     self.getDamaged()
                 elif p.code == "#":
                     self.spawn = p
+                elif p.code == "!":
+                    self.won = True
 
 
     def getDamaged(self):
