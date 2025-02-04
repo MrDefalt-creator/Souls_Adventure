@@ -15,6 +15,8 @@ directions = {
 
 cantCollide = ["-", "e", "^", "*", "#"]
 
+destructable = ["q", "a", "z"]
+
 TYPICAL_ANIMS = {
     "Warrior": {
         "Idle": (1,0,170),
@@ -105,10 +107,7 @@ class Player(sprite.Sprite):
         # Загружаем спрайт
         self.sprite_width = 150
         self.sprite_height = 110
-        self.image = transform.scale(
-            get_sprite(sheets["Warrior"], warrior[0][0], warrior[0][1], sprite_params["Warrior"][0], sprite_params["Warrior"][1]),
-            (self.sprite_width, self.sprite_height)
-        )
+        self.image = transform.scale(get_sprite(sheets["Warrior"],0,0,1,1),(self.sprite_width, self.sprite_height))
         self.image.set_colorkey((0, 0, 0))
 
         # Создаем хитбокс (уменьшим его, чтобы он совпадал с ногами персонажа)
@@ -208,9 +207,9 @@ class Player(sprite.Sprite):
             self.playAnim("Jump")
 
         self.attack.rect.centerx = self.rect.centerx + directions[self.facing] * 50
-        self.attack.rect.centery = self.rect.centery
+        self.attack.rect.centery = self.rect.centery - 5
 
-        self.checkDamage(enemies)
+        self.checkDamage(enemies, platforms)
         self.checkItems()
 
     def playAnim(self, name):
@@ -245,7 +244,7 @@ class Player(sprite.Sprite):
                     if yvel < 0:
                         self.rect.top = p.rect.bottom
                         self.yvel = 0
-                elif p.code == "^" and not self.inv:
+                elif p.code == "^" and not self.inv and p.isVisible:
                     self.getDamaged()
                 elif p.code == "#":
                     self.spawn = p
@@ -261,7 +260,7 @@ class Player(sprite.Sprite):
         self.xvel = 7 * directions[getOppositeDirection(self.facing)]
         
 
-    def checkDamage(self, enemies):
+    def checkDamage(self, enemies, platforms = []):
         for e in enemies:
             if sprite.collide_rect(self, e) and not self.inv and not e.health <= 0:
                 self.getDamaged()
@@ -273,6 +272,10 @@ class Player(sprite.Sprite):
                 e.facing = getOppositeDirection(self.facing)
                 if e.health <= 0 and self.health < 4:
                     e.spawnItem()
+        for p in platforms:
+            if sprite.collide_rect(self.attack, p) and p.isDestructable and self.isAttacking:
+                p.canCollide = False
+                p.isVisible = False
             
     def checkItems(self):
         for i in Items:
@@ -287,7 +290,7 @@ class Player(sprite.Sprite):
 
         # Смещаем спрайт так, чтобы он находился над хитбоксом
         sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2
-        sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height)
+        sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height) + 2
 
         # Рисуем спрайт поверх хитбокса
         screen.blit(self.image, (sprite_x, sprite_y))
@@ -305,6 +308,8 @@ class Platform(sprite.Sprite):
     def __init__(self, x, y, tile):
         sprite.Sprite.__init__(self)
         self.canCollide = True if tile not in cantCollide else False
+        self.isDestructable = True if tile in destructable else False
+        self.isVisible = True
         self.code = tile
         self.image = Surface((PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image.fill(Color(PLATFORM_COLOR))

@@ -10,7 +10,6 @@ sheets = {
 sprite_params = {
     "Tile": (24,24),
     "Warrior": (50,37),
-    "Witch": (),
     "Health": (64, 16),
     "Skeleton":(150,150)
 }
@@ -29,14 +28,22 @@ tiles = {
     "e": [4,0],
     "^": [4,3],
     "*": [4,0],
-    "#": [4,0]
+    "#": [4,0],
+    "<": [9,3],
+    "=": [12,10],
+    ">": [11,3],
+    "(": [0,3],
+    "_": [1,3],
+    ")": [3,3],
+    "v": [6,5],
+    "q": [15,10],
+    "a": [15,6],
+    "z": [15,11]
 }
 
 health = [[0,0],[0,1],[0,2],[0,3],[0,4]]
 
-warrior = [
-    [0,0]
-]
+placeholder = [0,0]
 
 def get_sprite(sprite_sheet, x, y, sprite_width, sprite_height, flipped = False):
     sprite_rect = Rect(x * sprite_width, y * sprite_height, sprite_width, sprite_height)

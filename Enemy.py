@@ -34,10 +34,7 @@ class Enemy(pygame.sprite.Sprite):
         # Загружаем спрайт
         self.sprite_width = 370
         self.sprite_height = 370
-        self.image = transform.scale(
-            get_sprite(sheets[charType], warrior[0][0], warrior[0][1], sprite_params[charType][0], sprite_params[charType][1]),
-            (self.sprite_width, self.sprite_height)
-        )
+        self.image = transform.scale(get_sprite(sheets["Warrior"],0,0,1,1),(self.sprite_width, self.sprite_height))
         self.image.set_colorkey((0, 0, 0))
         self.hitbox_width = 80
         self.hitbox_height = 120
@@ -93,11 +90,10 @@ class Enemy(pygame.sprite.Sprite):
                         self.rect.top = p.rect.bottom
                         self.yvel = 0
                 elif p.code == "*":
-                    p.tick = time.get_ticks()
                     if xvel > 0:
-                        self.rect.right = p.rect.left
+                        self.rect.right = p.rect.left - 1
                     if xvel < 0:
-                        self.rect.left = p.rect.right
+                        self.rect.left = p.rect.right + 1
 
     def playAnim(self, name):
         self.Animations[self.facing][name].play()

@@ -1,12 +1,6 @@
 from spritehandler import *
 from pygame import *
 
-# TODO:
-# Добавить в Player свойство facing, определяет последний поворот в сторону
-# Добавить в Player свойство state, определяет получение урона, смерть и т.д.
-# Добавить в Player свойство hp, объяснения не требуются
-#
-
 AnimFrames = {
     "Warrior": {
         "Idle": [(0, 0), (1, 0), (2, 0), (3, 0)],
