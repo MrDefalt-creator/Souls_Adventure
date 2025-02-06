@@ -138,7 +138,7 @@ class Enemy(pygame.sprite.Sprite):
         sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2
         sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height) // 2 - 5
 
-        draw.rect(screen, (255,0,0), self.attack.rect, 3)
+        #draw.rect(screen, (255,0,0), self.attack.rect, 3)
 
         # Рисуем спрайт поверх хитбокса
         screen.blit(self.image, (sprite_x, sprite_y))

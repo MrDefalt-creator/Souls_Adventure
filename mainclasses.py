@@ -290,6 +290,7 @@ class Player(sprite.Sprite):
 
         if self.isParrying:
             self.playAnim("Parry")
+            self.xvel = 0
 
         self.attack.rect.centerx = self.rect.centerx + directions[self.facing] * 50
         self.attack.rect.centery = self.rect.centery - 5
@@ -297,9 +298,10 @@ class Player(sprite.Sprite):
 
         if self.isCountering:
             self.playAnim("Counter")
-            self.xvel = directions[self.facing] * 10
+            #self.xvel = directions[self.facing] * 10
             if not self.Animations[self.facing]["Counter"].isPlaying:
                 self.isCountering = False
+                self.isStunned = False
                 self.invOver = False
 
         if self.isHurt:
