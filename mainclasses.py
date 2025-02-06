@@ -26,13 +26,18 @@ TYPICAL_ANIMS = {
         "Attack1": (0,0,75),
         "Attack2": (0,0,75),
         "Attack3": (0,0,50),
-        "WallSlide": (1,0,100)
+        "WallSlide": (1,0,100),
+        "Crouch": (1,0,170),
+        "Slide": (0,0,100),
+        "Parry": (1,0,100),
+        "Counter": (0,0,150)
     },
     "Skeleton":{
         "Idle": (1,0,170),
         "Walk": (1,0,100),
         "Take_hit": (0,0,100),
-        "Death": (0,1,100)
+        "Death": (0,1,100),
+        "Attack": (0,0,100)
     }
     
 }
@@ -73,7 +78,7 @@ def camera_configure(camera, target_rect):
     _, _, w, h = camera
     l, t = -l + SCREEN_WIDTH / 2, -t + SCREEN_HEIGHT / 2
 
-    l = max(-(camera.width - SCREEN_WIDTH), l)  # Не движемся дальше левой границы
+    l = max(-(camera.width - SCREEN_WIDTH), l) 
     t = max((camera.height - SCREEN_HEIGHT), t)  # Не движемся дальше нижней границы
     t = min(0, t + 100)  # Не движемся дальше верхней границы
 
@@ -85,18 +90,29 @@ class Player(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.xvel = 0
         self.yvel = 0
-        self.isVisible = True
         self.inv = False
+        self.isVisible = True
         self.isHurt = False
+        self.isStunned = False
+        self.isCrouching = False
+        self.isParrying = False
+        self.isCountering = False
+        self.isSliding = False
+        self.isJumping = False
+        self.isAttacking = False
+        self.isDamaging = False
+        self.onGround = False
+        self.onWall = False
+        self.parryTick = -1000
         self.hurtTick = -1000
         self.invTick = -4000
+        self.invOver = False
+        self.stunTick = -500
         self.spawn = spawn
         self.beginning = spawn
         self.won = False
         self.maxhealth = 4
         self.health = self.maxhealth
-        self.onGround = False
-        self.onWall = False
         self.attack = namespace(rect = Rect(0,0,50,100))
         self.Animations = {
             "Left": {},
@@ -104,8 +120,6 @@ class Player(sprite.Sprite):
         }
         self.facing = "Right"
         self.charType = charType
-        self.isJumping = False
-        self.isAttacking = False
         self.attackCount = 0
 
         # Загружаем спрайт
@@ -124,9 +138,15 @@ class Player(sprite.Sprite):
             for anim, params in TYPICAL_ANIMS[self.charType].items():
                 Animation(self, anim, self.charType, direction, params[0], params[1], params[2])
 
-    def update(self, left, right, up, platforms, z, enemies):
+    def update(self, left, right, up, down, platforms, z, c, enemies):
+
+        if self.isDamaging:
+            self.isDamaging = False
 
         invDiff = time.get_ticks() - self.invTick
+
+        if self.isStunned:
+            left = right = up = down = z = c = False
 
         if invDiff > 3000:
             self.inv = False
@@ -137,11 +157,21 @@ class Player(sprite.Sprite):
             else:
                 self.isVisible = True
 
+        if self.invOver:
+            self.inv = True
+        
+        if time.get_ticks() - self.parryTick > 300 and self.isParrying:
+            self.isParrying = False
+            self.isStunned = True
+            self.stunTick = time.get_ticks()
 
         if time.get_ticks() - self.hurtTick > 500:
             self.isHurt = False
 
-        if up and self.onGround and not self.isAttacking and not self.isHurt:
+        if time.get_ticks() - self.stunTick > 500:
+            self.isStunned = False
+
+        if up and self.onGround and not self.isAttacking and not self.isHurt and not self.isCrouching and not self.isSliding and not self.isParrying and not self.isCountering:
             self.yvel = -JUMP_POWER
             self.isJumping = True
             self.playAnim("Jump")
@@ -165,7 +195,7 @@ class Player(sprite.Sprite):
             right = False
             left = False
 
-        if left and not self.isHurt:
+        if left and not self.isHurt and not self.isCrouching and not self.isSliding and not self.isParrying and not self.isCountering:
             if self.isAttacking:
                 if self.isJumping and self.facing == "Left":
                     self.xvel = -MOVE_SPEED
@@ -178,7 +208,7 @@ class Player(sprite.Sprite):
                 self.facing = "Left"
                 self.playAnim("Walk")
 
-        if right and not self.isHurt:
+        if right and not self.isHurt and not self.isCrouching and not self.isSliding and not self.isParrying and not self.isCountering:
             if self.isAttacking:
                 if self.isJumping and self.facing == "Right":
                     self.xvel = MOVE_SPEED
@@ -191,10 +221,33 @@ class Player(sprite.Sprite):
                 self.facing = "Right"
                 self.playAnim("Walk")
 
-        if not (left or right) and not self.isAttacking and not self.isHurt:
+        if not (left or right) and not self.isAttacking and not self.isHurt and not self.isCrouching and not self.isSliding and not self.isParrying and not self.isCountering:
             self.xvel = 0
             self.playAnim("Idle")
             self.onWall = False
+
+        if self.isSliding:
+            self.xvel = directions[self.facing] * 10
+            self.playAnim("Slide")
+            self.rect.height = PLATFORM_HEIGHT
+            if not self.Animations[self.facing]["Slide"].isPlaying:
+                self.isSliding = False
+
+        if down and not self.isAttacking and not self.isHurt and not self.isJumping and not self.onWall and self.onGround and not self.isSliding and not self.isParrying and not self.isCountering:
+            self.xvel = 0
+            self.isCrouching = True
+            self.playAnim("Crouch")
+            self.rect.height = PLATFORM_HEIGHT
+            self.rect.bottomleft = (self.rect.x, self.rect.y + self.sprite_height)
+            if up:
+                self.isCrouching = False
+                self.isSliding = True
+
+        if not down:
+            self.isCrouching = False
+
+        if not (self.isSliding or self.isCrouching):
+            self.rect.height = self.hitbox_height
 
         if self.onWall:
             global GRAVITY
@@ -210,8 +263,6 @@ class Player(sprite.Sprite):
         self.rect.y += self.yvel
         self.collide(0, self.yvel, platforms, right, left)
 
-        print(self.onGround)
-
         self.rect.x += self.xvel
         self.collide(self.xvel, 0, platforms, right, left)
 
@@ -220,7 +271,7 @@ class Player(sprite.Sprite):
         elif self.isJumping:
             self.playAnim("Jump")
 
-        if z and not self.isAttacking and not self.isHurt and not self.onWall:
+        if z and not self.isAttacking and not self.isHurt and not self.onWall and not self.isSliding:
             self.attackCount += 1
             if self.attackCount == 4: self.attackCount = 1
             self.isAttacking = True
@@ -230,18 +281,45 @@ class Player(sprite.Sprite):
             self.playAnim(f"Attack{self.attackCount}")
             if not self.Animations[self.facing][f"Attack{self.attackCount}"].isPlaying:
                 self.isAttacking = False
+            
+        if c and not self.isAttacking and not self.isHurt and not self.onWall and not self.isSliding:
+            self.isParrying = True
+            self.isStunned = True
+            self.stunTick = time.get_ticks() + 500
+            self.parryTick = time.get_ticks()
 
-        if self.isHurt:
-            self.playAnim("Jump")
+        if self.isParrying:
+            self.playAnim("Parry")
 
         self.attack.rect.centerx = self.rect.centerx + directions[self.facing] * 50
         self.attack.rect.centery = self.rect.centery - 5
+        self.attack.rect.width = 50
+
+        if self.isCountering:
+            self.playAnim("Counter")
+            self.xvel = directions[self.facing] * 14
+            self.attack.rect.centerx = self.rect.centerx + directions[self.facing] * 20
+            self.attack.rect.width = 230
+            if not self.Animations[self.facing]["Counter"].isPlaying:
+                self.isCountering = False
+                self.invOver = False
+
+        if self.isHurt:
+            if (self.isCrouching or self.isSliding):
+                self.rect.bottomleft = (self.rect.x, self.rect.y)
+                self.isCrouching = False
+                self.isSliding = False
+            self.isAttacking = False
+            self.onWall = False
+            self.playAnim("Jump")
 
         self.checkDamage(enemies, platforms)
         self.checkItems()
 
     def playAnim(self, name):
-        self.Animations[self.facing][name].play()
+        frame = self.Animations[self.facing][name].play()
+        if frame.event:
+            frame.event(self)
 
     def stopAnim(self, name):
         self.Animations[self.facing][name].stop()
@@ -261,17 +339,15 @@ class Player(sprite.Sprite):
                 if p.canCollide:
                     if xvel > 0:
                         self.rect.right = p.rect.left
-                        if not self.onGround and right:
+                        if not self.onGround and right and self.yvel >= 0:
                             self.isJumping = False
                             self.onWall = True
-                            self.yvel = clamp(self.yvel, 0, 1000)
                             self.playAnim("WallSlide")
                     if xvel < 0:
                         self.rect.left = p.rect.right
-                        if not self.onGround and left:
+                        if not self.onGround and left and self.yvel >= 0:
                             self.isJumping = False
                             self.onWall = True
-                            self.yvel = clamp(self.yvel, 0, 1000)
                             self.playAnim("WallSlide")
                     if yvel > 0:
                         self.rect.bottom = p.rect.top
@@ -297,15 +373,30 @@ class Player(sprite.Sprite):
         self.invTick = time.get_ticks()
         self.isHurt = True
         self.hurtTick = time.get_ticks()
+        if (self.isCrouching or self.isSliding):
+            self.rect.bottomleft = (self.rect.x, self.rect.y)
+            self.isCrouching = False
+            self.isSliding = False
+        self.isAttacking = False
+        self.onWall = False
         self.yvel = -7
         self.xvel = 7 * directions[getOppositeDirection(self.facing)]
         
 
     def checkDamage(self, enemies, platforms = []):
         for e in enemies:
-            if sprite.collide_rect(self, e) and not self.inv and not e.health <= 0:
-                self.getDamaged()
-            if sprite.collide_rect(self.attack, e) and self.isAttacking and not e.inv and e.health > 0:
+            if sprite.collide_rect(self, e.attack) and e.health > 0 and e.isDamaging:
+                if self.isParrying:
+                    print("COUNTER")
+                    e.isDamaging = False
+                    self.isParrying = False
+                    self.isCountering = True
+                    self.invOver = True
+                    self.isStunned = True
+                    self.stunTick = time.get_ticks()
+                elif not self.inv:
+                    self.getDamaged()
+            if sprite.collide_rect(self.attack, e) and self.isDamaging and not e.inv and e.health > 0:
                 e.addHealth(-1)
                 e.inv = True
                 e.invTick = time.get_ticks()
@@ -314,7 +405,7 @@ class Player(sprite.Sprite):
                 if e.health <= 0 and self.health < 4:
                     e.spawnItem()
         for p in platforms:
-            if sprite.collide_rect(self.attack, p) and p.isDestructable and self.isAttacking:
+            if sprite.collide_rect(self.attack, p) and p.isDestructable and (self.isDamaging or self.isSliding):
                 p.canCollide = False
                 p.isVisible = False
             
@@ -331,7 +422,10 @@ class Player(sprite.Sprite):
 
         # Смещаем спрайт так, чтобы он находился над хитбоксом
         sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2
-        sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height) + 2
+        if self.isCrouching or self.isSliding:
+            sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height) - 36
+        else:
+            sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height) + 2
 
         # Рисуем спрайт поверх хитбокса
         screen.blit(self.image, (sprite_x, sprite_y))

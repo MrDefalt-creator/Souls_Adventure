@@ -7,6 +7,7 @@ from spritehandler import *
 from animator import *
 from Heal import Heal
 from random import *
+from types import SimpleNamespace as namespace
 
 MOVE_SPEED = 2
 
@@ -18,6 +19,8 @@ class Enemy(pygame.sprite.Sprite):
         self.yvel = 0
         self.spawn = spawn
         self.isHurt = False
+        self.isAttacking = False
+        self.isDamaging = False
         self.hurtTick = -1000
         self.inv = False
         self.invTick = -1000
@@ -40,13 +43,19 @@ class Enemy(pygame.sprite.Sprite):
         self.hitbox_height = 120
         self.startPos = Rect(x, y, self.hitbox_width, self.hitbox_height)
         self.rect = self.startPos  
+        self.attack = namespace(rect = Rect(self.rect.x + directions[self.facing] * 90, self.rect.y, 200, self.hitbox_height))
         for direction in ["Left", "Right"]:
             for anim, params in TYPICAL_ANIMS[self.charType].items():
                 Animation(self, anim, self.charType, direction, params[0], params[1], params[2], self.sprite_width, self.sprite_height)
     
-    def update(self, platforms):
+    def update(self, platforms, hero):
+    
+        self.attack.rect.centerx = self.rect.centerx + directions[self.facing] * 90
+        self.attack.rect.centery = self.rect.centery
 
-        if time.get_ticks() - self.invTick > 500:
+        self.isDamaging = False
+
+        if time.get_ticks() - self.invTick > 200:
             self.inv = False
 
         self.playAnim("Idle")
@@ -62,10 +71,17 @@ class Enemy(pygame.sprite.Sprite):
         if not self.onGround:
             self.yvel += GRAVITY
 
-        if not self.inv and not self.health <= 0:
+        if not self.inv and not self.health <= 0 and not self.isHurt and not self.isAttacking:
             self.do_something()
         else:
             self.xvel = 0
+
+        if self.isAttacking and not self.health <= 0:
+            self.playAnim("Attack")
+            if not self.Animations[self.facing]["Attack"].isPlaying:
+                self.isAttacking = False
+
+        self.checkHero(hero)
 
         self.onGround = False
         self.rect.y += self.yvel
@@ -96,13 +112,19 @@ class Enemy(pygame.sprite.Sprite):
                         self.rect.left = p.rect.right + 1
 
     def playAnim(self, name):
-        self.Animations[self.facing][name].play()
+        frame = self.Animations[self.facing][name].play()
+        if frame.event:
+            frame.event(self)
 
     def stopAnim(self, name):
         self.Animations[self.facing][name].stop()
     
     def addHealth(self, diff):
         self.health = clamp(self.health + diff, 0, self.maxhealth)
+
+    def checkHero(self, hero):
+        if sprite.collide_rect(self.attack, hero) and not self.isAttacking and not self.health <= 0:
+            self.isAttacking = True
 
     def spawnItem(self):
         Heal(self)
@@ -114,6 +136,8 @@ class Enemy(pygame.sprite.Sprite):
         # Смещаем спрайт так, чтобы он находился над хитбоксом
         sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2
         sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height) // 2 - 5
+
+        #draw.rect(screen, (255,0,0), self.attack.rect, 3)
 
         # Рисуем спрайт поверх хитбокса
         screen.blit(self.image, (sprite_x, sprite_y))

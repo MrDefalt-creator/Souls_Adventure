@@ -36,17 +36,21 @@ def main():
      # создаем героя по (x,y) координатам
 
     left = right = False
+    down = False
     up = False
     antihold = False
     z = False
+    c = False
 
     entities = pygame.sprite.Group() # Все объекты
     platforms = [] # то, во что мы будем врезаться или опираться
     entities.add()
     timer = pygame.time.Clock()
-    level = Levels[1]
+
+    level = Levels[0]
+
     enemies = []
-    x=y=0 # координатыz
+    x=y=0 # координаты
     for row in level: # вся строка
         for col in row: # каждый символ
             if col != " ":
@@ -82,25 +86,33 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == KEYDOWN and event.key == K_UP:
+            if event.type == KEYDOWN and event.key == K_x:
                 up = True
             if event.type == KEYDOWN and event.key == K_LEFT:
                 left = True
             if event.type == KEYDOWN and event.key == K_RIGHT:
                 right = True
-            if event.type == KEYDOWN and event.key == K_f:
+            if event.type == KEYDOWN and event.key == K_DOWN:
+                down = True
+            if event.type == KEYDOWN and event.key == K_z:
                 z = True
+            if event.type == KEYDOWN and event.key == K_c:
+                c = True
 
 
-            if event.type == KEYUP and event.key == K_UP:
+            if event.type == KEYUP and event.key == K_x:
                 up = False
                 antihold = False
             if event.type == KEYUP and event.key == K_RIGHT:
                 right = False
             if event.type == KEYUP and event.key == K_LEFT:
                 left = False
-            if event.type == KEYUP and event.key == K_f:
+            if event.type == KEYUP and event.key == K_DOWN:
+                down = False
+            if event.type == KEYUP and event.key == K_z:
                 z = False
+            if event.type == KEYUP and event.key == K_c:
+                c = False
 
         screen.fill([255, 255, 255])
 
@@ -132,13 +144,13 @@ def main():
 
         for e in enemies:
             camera.apply(e)
-            e.update(platforms)
+            e.update(platforms, hero)
             e.draw(screen)
 
         if antihold:
             up = False
 
-        hero.update(left, right, up, platforms, z, enemies)
+        hero.update(left, right, up, down, platforms, z, c, enemies)
 
         if up:
             antihold = True
@@ -150,12 +162,13 @@ def main():
                 e.update()
                 e.draw(screen)
 
+        #draw.rect(screen, (0,0,255), hero.rect, 1)
+        #draw.rect(screen, (0,0,255), hero.attack.rect, 3)
         if hero.isVisible:
             hero.draw(screen)
 
         if hero.won:
             return screen, True
-        #draw.rect(screen, (255,0,0), hero.attack.rect, 3)
 
         for e in entities:
             camera.apply(e)
@@ -171,10 +184,7 @@ def main():
 main_menu(screen)
 
 while True:
-    try:
-        screen, win = main()
-    except Exception:
-        break
+    screen, win = main()
     if win:
         win_screen(screen)
     else:
