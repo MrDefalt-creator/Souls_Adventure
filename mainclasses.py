@@ -25,7 +25,8 @@ TYPICAL_ANIMS = {
         "Fall": (1,0,100),
         "Attack1": (0,0,75),
         "Attack2": (0,0,75),
-        "Attack3": (0,0,50)
+        "Attack3": (0,0,50),
+        "WallSlide": (1,0,100)
     },
     "Skeleton":{
         "Idle": (1,0,170),
@@ -42,6 +43,7 @@ HEIGHT = 110
 COLOR = "#008000"
 JUMP_POWER = 10
 GRAVITY = 0.35  # Сила, которая будет тянуть нас вниз
+ACTUAL_GRAVITY = 0.35
 ANIMATION_DELAY = 0.1  # скорость смены кадров
 ICON_DIR = os.path.dirname(__file__)  # Полный путь к каталогу с файлами
 
@@ -94,6 +96,7 @@ class Player(sprite.Sprite):
         self.maxhealth = 4
         self.health = self.maxhealth
         self.onGround = False
+        self.onWall = False
         self.attack = namespace(rect = Rect(0,0,50,100))
         self.Animations = {
             "Left": {},
@@ -142,6 +145,16 @@ class Player(sprite.Sprite):
             self.yvel = -JUMP_POWER
             self.isJumping = True
             self.playAnim("Jump")
+        elif up and self.onWall:
+            self.yvel = -JUMP_POWER
+            self.xvel = self.xvel = 7 * directions[getOppositeDirection(self.facing)]
+            self.facing = getOppositeDirection(self.facing)
+            self.isJumping = True
+            self.isHurt = True
+            self.hurtTick = time.get_ticks()
+            self.onWall = False
+            self.playAnim("Jump")
+
 
         if self.rect.y > 700:
             self.addHealth(-1)
@@ -159,6 +172,8 @@ class Player(sprite.Sprite):
                 else:
                     self.xvel = 0
             else:
+                if self.onWall and self.facing == "Right":
+                    self.onWall = False
                 self.xvel = -MOVE_SPEED
                 self.facing = "Left"
                 self.playAnim("Walk")
@@ -170,6 +185,8 @@ class Player(sprite.Sprite):
                 else:
                     self.xvel = 0
             else:
+                if self.onWall and (self.facing == "Left" or self.onGround):
+                    self.onWall = False
                 self.xvel = MOVE_SPEED
                 self.facing = "Right"
                 self.playAnim("Walk")
@@ -177,23 +194,33 @@ class Player(sprite.Sprite):
         if not (left or right) and not self.isAttacking and not self.isHurt:
             self.xvel = 0
             self.playAnim("Idle")
+            self.onWall = False
 
-        if not self.onGround:
-            self.yvel += GRAVITY
+        if self.onWall:
+            global GRAVITY
+            GRAVITY = ACTUAL_GRAVITY / 3
+        else:
+            GRAVITY = ACTUAL_GRAVITY
+
+        self.yvel += GRAVITY
 
         self.onGround = False
+        self.onWall = False
+
         self.rect.y += self.yvel
-        self.collide(0, self.yvel, platforms)
+        self.collide(0, self.yvel, platforms, right, left)
+
+        print(self.onGround)
 
         self.rect.x += self.xvel
-        self.collide(self.xvel, 0, platforms)
+        self.collide(self.xvel, 0, platforms, right, left)
 
         if self.isJumping and not (self.Animations["Left"]["Jump"].isPlaying or self.Animations["Right"]["Jump"].isPlaying):
             self.playAnim("Fall")
         elif self.isJumping:
             self.playAnim("Jump")
 
-        if z and not self.isAttacking and not self.isHurt:
+        if z and not self.isAttacking and not self.isHurt and not self.onWall:
             self.attackCount += 1
             if self.attackCount == 4: self.attackCount = 1
             self.isAttacking = True
@@ -228,20 +255,31 @@ class Player(sprite.Sprite):
     def addHealth(self, diff):
         self.health = clamp(self.health + diff, 0, self.maxhealth)
 
-    def collide(self, xvel, yvel, platforms):
+    def collide(self, xvel, yvel, platforms, right, left):
         for p in platforms:
             if sprite.collide_rect(self, p):
                 if p.canCollide:
                     if xvel > 0:
                         self.rect.right = p.rect.left
+                        if not self.onGround and right:
+                            self.isJumping = False
+                            self.onWall = True
+                            self.yvel = clamp(self.yvel, 0, 1000)
+                            self.playAnim("WallSlide")
                     if xvel < 0:
                         self.rect.left = p.rect.right
+                        if not self.onGround and left:
+                            self.isJumping = False
+                            self.onWall = True
+                            self.yvel = clamp(self.yvel, 0, 1000)
+                            self.playAnim("WallSlide")
                     if yvel > 0:
                         self.rect.bottom = p.rect.top
                         self.onGround = True
+                        self.onWall = False
                         self.isJumping = False
                         self.stopAnim("Jump")
-                        self.yvel = 0
+                        self.yvel = GRAVITY
                     if yvel < 0:
                         self.rect.top = p.rect.bottom
                         self.yvel = 0

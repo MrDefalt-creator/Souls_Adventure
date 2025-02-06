@@ -5,6 +5,7 @@ from EndScreen import death_screen, win_screen
 from mainclasses import *
 from menu import *
 from Heal import Items
+from Levels import Levels
 from GUI import GUI
 from Enemy import Enemy
 from InfiniteScrolling import Scroller
@@ -36,29 +37,14 @@ def main():
 
     left = right = False
     up = False
+    antihold = False
     z = False
 
     entities = pygame.sprite.Group() # Все объекты
     platforms = [] # то, во что мы будем врезаться или опираться
     entities.add()
-
-    level = [
-           "                                                                                                                                 8                                                                                                                                                                     400000000000000005                                                                                                                                                                                                                                                                                                                     ",
-           "                                                                                                                                 8                                                                                                                                                                     (________________)                                                      12222223                                                                                                                                                                                                                                                       ",
-           "                                                                                                                                 8                                                                                                                                                   * e  *    ^  ^                                                                            4      5                                                                                                                                                                                                                                                       ",
-           "                                                                                                                                 8                                                                                                                                                  <=====>  <=====>                                                   q                       4      5                                                                                                                                                                                                                                                       ",
-           "                                                                                                                                 8                                                                                                                                             <>                                                                      a                       q      5                                                                                                                                                                                                                                                       ",
-           "                                                                                                                                 8   #       *  e *                                                                                                                                                     ^  ^  ^  ^  ^  ^  ^^     ^^ * e   *            z                       z  !   5                                                                                                                                                                                                                                                       ",
-           "                                                                                                                   <=>           8   67      122223                        q                                                                                                 6                         <=================================>             12222222222222222222222222222225                                                                                                                                                                                                                                                       ",
-           "                                              q                                                             ^                    8    8      400005                        a                                                                                           #          ^  ^  ^  ^                                                  <=>      40000000000000000000000000000005                                                                                                                                                                                                                                                       ",
-           "                 <==>                         a                                                          <===>                   86   8      400005         ^              a                                         <====>            q                      *e *    122222222222222222222223                                                         40000000000000000000000000000005                                                                                                                                                                                                                                                       ",
-           "                                              a                   ^^                            ^^                               v    8      400005        123             z                                    #^                     a                ^^   12223    400000000000000000000005   * e   *                                    *  e*   7  40000000000000000000000000000005                                                                                                                                                                                                                                                       ",
-           "             7                                z                 1223                          122223                             q   68      400005        405     ^  ^^   12223                                13                     a       *e *   1223   40005    400000000000000000000005   122222223                   ^  ^  ^  7   12222222223  40000000000000000000000000000005                                                                                                                                                                                                                                                       ",
-           "        -    8         e        ^^^    #    123                 4005   *        ^        * #  400005   *     e    *^^^           z    8      400005        405     12223   40005           ^^^^                 45  123                z      12223   4005   40005    400000000000000000000005   400000005      ^^  ^^      12222222223   40000000005  40000000000000000000000000000005                                                                                                                                                                                                                                                       ",
-           "122222222223 8 12222222222222222222222223   405    * e   *7     4005  ^^  *   123    *e  ^ 7  400005   1222222222222222222222222223   8      400005        405     40005   40005  12222222222222222222222222223 45  405        ^^^     123    40005   4005   40005    400000000000000000000005   400000005   122222222223   40000000005   40000000005  40000000000000000000000000000005                                                                                                                                                                                                                                                       ",
-           "400000000005 8 40000000000000000000000005   405    12222223     4005  12223   405    1222223  400005   4000000000000000000000000005   8      400005        405     40005   40005  40000000000000000000000000005 45  405       12223    405    40005   4005   40005    400000000000000000000005   400000005   400000000005   40000000005   40000000005  40000000000000000000000000000005                                                                                                                                                                                                                                                       "]
-
     timer = pygame.time.Clock()
+    level = Levels[1]
     enemies = []
     x=y=0 # координатыz
     for row in level: # вся строка
@@ -108,6 +94,7 @@ def main():
 
             if event.type == KEYUP and event.key == K_UP:
                 up = False
+                antihold = False
             if event.type == KEYUP and event.key == K_RIGHT:
                 right = False
             if event.type == KEYUP and event.key == K_LEFT:
@@ -148,7 +135,13 @@ def main():
             e.update(platforms)
             e.draw(screen)
 
+        if antihold:
+            up = False
+
         hero.update(left, right, up, platforms, z, enemies)
+
+        if up:
+            antihold = True
 
         camera.apply(healthbar, 10000)
 
@@ -178,7 +171,10 @@ def main():
 main_menu(screen)
 
 while True:
-    screen, win = main()
+    try:
+        screen, win = main()
+    except Exception:
+        break
     if win:
         win_screen(screen)
     else:
