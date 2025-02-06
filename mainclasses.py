@@ -297,9 +297,7 @@ class Player(sprite.Sprite):
 
         if self.isCountering:
             self.playAnim("Counter")
-            self.xvel = directions[self.facing] * 14
-            self.attack.rect.centerx = self.rect.centerx + directions[self.facing] * 20
-            self.attack.rect.width = 230
+            self.xvel = directions[self.facing] * 10
             if not self.Animations[self.facing]["Counter"].isPlaying:
                 self.isCountering = False
                 self.invOver = False
@@ -387,13 +385,17 @@ class Player(sprite.Sprite):
         for e in enemies:
             if sprite.collide_rect(self, e.attack) and e.health > 0 and e.isDamaging:
                 if self.isParrying:
-                    print("COUNTER")
-                    e.isDamaging = False
                     self.isParrying = False
                     self.isCountering = True
                     self.invOver = True
-                    self.isStunned = True
-                    self.stunTick = time.get_ticks()
+                    if e.facing == getOppositeDirection(self.facing):
+                        e.addHealth(-1)
+                        e.inv = True
+                        e.invTick = time.get_ticks()
+                        e.isHurt = True
+                        e.hurtTick = time.get_ticks()
+                    if e.health <= 0 and self.health < 4:
+                        e.spawnItem()
                 elif not self.inv:
                     self.getDamaged()
             if sprite.collide_rect(self.attack, e) and self.isDamaging and not e.inv and e.health > 0:

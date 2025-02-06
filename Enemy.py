@@ -123,7 +123,8 @@ class Enemy(pygame.sprite.Sprite):
         self.health = clamp(self.health + diff, 0, self.maxhealth)
 
     def checkHero(self, hero):
-        if sprite.collide_rect(self.attack, hero) and not self.isAttacking and not self.health <= 0:
+        if sprite.collide_rect(self.attack, hero) and not self.isAttacking and not self.health <= 0 and not self.isHurt:
+            self.facing = getOppositeDirection(hero.facing)
             self.isAttacking = True
 
     def spawnItem(self):
@@ -137,7 +138,7 @@ class Enemy(pygame.sprite.Sprite):
         sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2
         sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height) // 2 - 5
 
-        #draw.rect(screen, (255,0,0), self.attack.rect, 3)
+        draw.rect(screen, (255,0,0), self.attack.rect, 3)
 
         # Рисуем спрайт поверх хитбокса
         screen.blit(self.image, (sprite_x, sprite_y))
