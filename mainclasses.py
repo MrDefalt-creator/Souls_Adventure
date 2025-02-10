@@ -13,7 +13,7 @@ directions = {
     "Left": -1
 }
 
-cantCollide = ["-", "e", "^", "*", "#", "!"]
+cantCollide = ["-", "e", "^", "*", "#", "!", ":", ";"]
 
 destructable = ["q", "a", "z"]
 
@@ -91,6 +91,7 @@ class Player(sprite.Sprite):
         self.xvel = 0
         self.yvel = 0
         self.inv = False
+        self.isFollowed = True if x > 1000 else False
         self.isVisible = True
         self.isHurt = False
         self.isStunned = False
@@ -339,13 +340,13 @@ class Player(sprite.Sprite):
                 if p.canCollide:
                     if xvel > 0:
                         self.rect.right = p.rect.left
-                        if not self.onGround and right and self.yvel >= 0:
+                        if not self.onGround and right and self.yvel >= 0 and p.code != "@":
                             self.isJumping = False
                             self.onWall = True
                             self.playAnim("WallSlide")
                     if xvel < 0:
                         self.rect.left = p.rect.right
-                        if not self.onGround and left and self.yvel >= 0:
+                        if not self.onGround and left and self.yvel >= 0 and p.code != "@":
                             self.isJumping = False
                             self.onWall = True
                             self.playAnim("WallSlide")
@@ -365,6 +366,10 @@ class Player(sprite.Sprite):
                     self.spawn = p
                 elif p.code == "!":
                     self.won = True
+                elif p.code == ":":
+                    self.isFollowed = False
+                elif p.code == ";":
+                    self.isFollowed = True
 
 
     def getDamaged(self):

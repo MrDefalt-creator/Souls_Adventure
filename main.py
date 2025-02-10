@@ -80,7 +80,7 @@ def main():
 
     # Main loop
     while running:
-        timer.tick(60)
+        timer.tick(100)
         # Look at every event in the queue
 
         for event in pygame.event.get():
@@ -121,19 +121,23 @@ def main():
         BackGround3.update()
 
         for bg in ["Left", "Center", "Right"]:
-            camera.apply(BackGround1.backs[bg], 6)
+            if hero.isFollowed:
+                camera.apply(BackGround1.backs[bg], 6)
             screen.blit(BackGround1.backs["Image"], BackGround1.backs[bg].rect)
 
         for bg in ["Left", "Center", "Right"]:
-            camera.apply(BackGround2.backs[bg], 3)
+            if hero.isFollowed:
+                camera.apply(BackGround2.backs[bg], 3)
             screen.blit(BackGround2.backs["Image"], BackGround2.backs[bg].rect)
 
         for bg in ["Left", "Center", "Right"]:
-            camera.apply(BackGround3.backs[bg], 1.5)
+            if hero.isFollowed:    
+                camera.apply(BackGround3.backs[bg], 1.5)
             screen.blit(BackGround3.backs["Image"], BackGround3.backs[bg].rect)
 
-        camera.apply(hero)
-        camera.update(hero)
+        if hero.isFollowed:
+            camera.apply(hero)
+            camera.update(hero)
 
         healthbar.update()
 
@@ -143,7 +147,8 @@ def main():
             return screen, False
 
         for e in enemies:
-            camera.apply(e)
+            if hero.isFollowed:
+                camera.apply(e)
             e.update(platforms, hero)
             e.draw(screen)
 
@@ -159,7 +164,8 @@ def main():
 
         for e in Items:
             if not e.used:
-                e.update()
+                if hero.isFollowed:
+                    e.update()
                 e.draw(screen)
 
         #draw.rect(screen, (0,0,255), hero.rect, 1)
@@ -171,7 +177,8 @@ def main():
             return screen, True
 
         for e in entities:
-            camera.apply(e)
+            if hero.isFollowed:
+                camera.apply(e)
             if e.isVisible:
                 screen.blit(e.image, e.rect)
 
