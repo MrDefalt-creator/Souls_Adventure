@@ -78,6 +78,11 @@ def main():
 
     healthbar = GUI(hero, camera)
 
+    walls = [
+        namespace(rect = Rect(0, 0, 20, 720)),
+        namespace(rect = Rect(1260, 0, 20, 720))
+    ]
+
     # Main loop
     while running:
         timer.tick(100)
@@ -154,8 +159,12 @@ def main():
 
         if antihold:
             up = False
+        for a in Attacks:
+            if hero.isFollowed:
+                camera.apply(a)
+            a.update()
 
-        hero.update(left, right, up, down, platforms, z, c, enemies)
+        hero.update(left, right, up, down, platforms, z, c, enemies, walls, Attacks)
 
         if up:
             antihold = True

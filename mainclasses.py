@@ -122,6 +122,8 @@ class Player(sprite.Sprite):
         self.facing = "Right"
         self.charType = charType
         self.attackCount = 0
+        self.attackCD = False
+        self.attackTick = -1000
 
         # Загружаем спрайт
         self.sprite_width = 150
@@ -139,10 +141,14 @@ class Player(sprite.Sprite):
             for anim, params in TYPICAL_ANIMS[self.charType].items():
                 Animation(self, anim, self.charType, direction, params[0], params[1], params[2])
 
-    def update(self, left, right, up, down, platforms, z, c, enemies):
+    def update(self, left, right, up, down, platforms, z, c, enemies, walls, attacks):
 
         if self.isDamaging:
             self.isDamaging = False
+
+        if time.get_ticks() - self.attackTick > 1000:
+            self.attackCount = 0
+            self.attackCD = False
 
         invDiff = time.get_ticks() - self.invTick
 
@@ -262,19 +268,21 @@ class Player(sprite.Sprite):
         self.onWall = False
 
         self.rect.y += self.yvel
-        self.collide(0, self.yvel, platforms, right, left)
+        self.collide(0, self.yvel, platforms, attacks, right, left)
 
         self.rect.x += self.xvel
-        self.collide(self.xvel, 0, platforms, right, left)
+        self.collide(self.xvel, 0, platforms, attacks, right, left, walls)
 
         if self.isJumping and not (self.Animations["Left"]["Jump"].isPlaying or self.Animations["Right"]["Jump"].isPlaying):
             self.playAnim("Fall")
         elif self.isJumping:
             self.playAnim("Jump")
 
-        if z and not self.isAttacking and not self.isHurt and not self.onWall and not self.isSliding:
+        if z and not self.isAttacking and not self.isHurt and not self.onWall and not self.isSliding and not self.attackCD:
             self.attackCount += 1
-            if self.attackCount == 4: self.attackCount = 1
+            if self.attackCount == 3:
+                self.attackCD = True
+            self.attackTick = time.get_ticks()
             self.isAttacking = True
             self.xvel = 0
 
@@ -334,7 +342,7 @@ class Player(sprite.Sprite):
     def addHealth(self, diff):
         self.health = clamp(self.health + diff, 0, self.maxhealth)
 
-    def collide(self, xvel, yvel, platforms, right, left):
+    def collide(self, xvel, yvel, platforms, attacks, right, left, walls=[]):
         for p in platforms:
             if sprite.collide_rect(self, p):
                 if p.canCollide:
@@ -370,6 +378,17 @@ class Player(sprite.Sprite):
                     self.isFollowed = False
                 elif p.code == ";":
                     self.isFollowed = True
+        for a in attacks:
+            if sprite.collide_rect(self, a) and not self.inv:
+                self.getDamaged()
+
+        for w in walls:
+            if sprite.collide_rect(self, w):
+                if xvel > 0:
+                    self.rect.right = w.rect.left
+                if xvel < 0:
+                    self.rect.left = w.rect.right
+
 
 
     def getDamaged(self):
@@ -447,6 +466,21 @@ class Background(sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
 
+from pygame import *
+
+Attacks = []
+
+class Attack(sprite.Sprite):
+    def __init__(self, x, y, width, height):
+        self.rect = Rect(x, y, width, height)
+        self.tick = time.get_ticks()
+        self.reflected = False
+        Attacks.append(self)
+        
+    def update(self):
+        if time.get_ticks() - self.tick > 100:
+            Attacks.pop(Attacks.index(self))
+            
 
 class Platform(sprite.Sprite):
     def __init__(self, x, y, tile):
