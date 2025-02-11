@@ -10,6 +10,8 @@ from GUI import GUI
 from Enemy import Enemy
 from InfiniteScrolling import Scroller
 
+from LevelSelector import level_selector_screen
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.SCALED, vsync=1)
 pygame.display.set_caption("The Souls Adventure")
 
@@ -47,7 +49,7 @@ def main():
     entities.add()
     timer = pygame.time.Clock()
 
-    level = Levels[0]
+    level = level_selector_screen(screen)
 
     enemies = []
     x=y=0 # координаты
