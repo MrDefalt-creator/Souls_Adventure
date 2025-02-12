@@ -4,14 +4,18 @@ tile_sheet = image.load("Assets/Woods/oak_woods_tileset.png")
 health_sheet = image.load("Assets/UI/LifeSheet.png")
 sheets = {
     "Warrior": image.load("Assets/Warrior/adventurer-sheet2.png"),
-    "Skeleton": image.load("Assets/Skeleton/sprite-sheet.png")
+    "Skeleton": image.load("Assets/Skeleton/sprite-sheet.png"),
+    "Witch": image.load("Assets/Witch/witch-sheet.png"),
+    "Ice": image.load("Assets/IceVFX1/ice-sheet.png")
 }
 
 sprite_params = {
     "Tile": (24,24),
     "Warrior": (50,37),
     "Health": (64, 16),
-    "Skeleton":(150,150)
+    "Skeleton":(150,150),
+    "Witch": (32, 48),
+    "Ice": (192, 192)
 }
 
 tiles = {
@@ -42,7 +46,8 @@ tiles = {
     "!": [4,0],
     ";": [4,0],
     ":": [4,0],
-    "@": [4,0]
+    "@": [4,0],
+    "?": [4,0]
 }
 
 health = [[0,0],[0,1],[0,2],[0,3],[0,4]]

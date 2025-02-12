@@ -13,9 +13,13 @@ directions = {
     "Left": -1
 }
 
-cantCollide = ["-", "e", "^", "*", "#", "!", ":", ";"]
+enemies = []
+
+cantCollide = ["-", "e", "^", "*", "#", "!", ":", ";", "?"]
 
 destructable = ["q", "a", "z"]
+
+walls = [":", ";", "?", "!"]
 
 TYPICAL_ANIMS = {
     "Warrior": {
@@ -32,14 +36,24 @@ TYPICAL_ANIMS = {
         "Parry": (1,0,100),
         "Counter": (0,0,150)
     },
-    "Skeleton":{
+    "Skeleton": {
         "Idle": (1,0,170),
         "Walk": (1,0,100),
         "Take_hit": (0,0,100),
         "Death": (0,1,100),
         "Attack": (0,0,100)
+    },
+    "Witch": {
+        "Idle": (1,0,170),
+        "Walk": (1,0,100),
+        "Take_hit": (0,0,100),
+        "Fly": (1,0,170)
+    },
+    "Ice": {
+        "Spawn": (0,0,100),
+        "Idle": (1,0,100),
+        "Destroy": (0,0,100)
     }
-    
 }
 
 MOVE_SPEED = 7
@@ -90,6 +104,7 @@ class Player(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.xvel = 0
         self.yvel = 0
+        self.triggerBoss = False
         self.inv = False
         self.isFollowed = True if x > 1000 else False
         self.isVisible = True
@@ -378,6 +393,10 @@ class Player(sprite.Sprite):
                     self.isFollowed = False
                 elif p.code == ";":
                     self.isFollowed = True
+                elif p.code == "?" and p.isVisible:
+                    self.triggerBoss = True
+                    p.isVisible = False
+
         for a in attacks:
             if sprite.collide_rect(self, a) and not self.inv:
                 self.getDamaged()
@@ -446,7 +465,7 @@ class Player(sprite.Sprite):
 
     def draw(self, screen):
         # Рисуем хитбокс (для отладки)
-        # pygame.draw.rect(screen, (0, 255, 0), self.rect, 2)  # Зеленый контур хитбокса
+        # draw.rect(screen, (0, 255, 0), self.rect, 2)  # Зеленый контур хитбокса
 
         # Смещаем спрайт так, чтобы он находился над хитбоксом
         sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2
@@ -465,8 +484,6 @@ class Background(sprite.Sprite):
         self.image = transform.scale(image.load(image_file), (SCREEN_WIDTH, SCREEN_HEIGHT)).convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
-
-from pygame import *
 
 Attacks = []
 
@@ -494,4 +511,4 @@ class Platform(sprite.Sprite):
         self.image = transform.scale(get_sprite(tile_sheet, tiles[tile][0], tiles[tile][1], sprite_params["Tile"][0], sprite_params["Tile"][1]),
                                      (PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image.set_colorkey((0, 0, 0))
-        self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT)
+        self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT) if tile not in walls else Rect(x, 0, PLATFORM_WIDTH, 720)

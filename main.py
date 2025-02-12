@@ -5,9 +5,9 @@ from EndScreen import death_screen, win_screen
 from mainclasses import *
 from menu import *
 from Heal import Items
-from Levels import Levels
 from GUI import GUI
 from Enemy import Enemy
+from witch import Witch
 from InfiniteScrolling import Scroller
 
 from LevelSelector import level_selector_screen
@@ -35,7 +35,7 @@ def main():
 
     # Вызов меню перед игрой
 
-     # создаем героя по (x,y) координатам
+    # создаем героя по (x,y) координатам
 
     left = right = False
     down = False
@@ -51,7 +51,6 @@ def main():
 
     level = level_selector_screen(screen)
 
-    enemies = []
     x=y=0 # координаты
     for row in level: # вся строка
         for col in row: # каждый символ
@@ -168,6 +167,10 @@ def main():
 
         hero.update(left, right, up, down, platforms, z, c, enemies, walls, Attacks)
 
+        if hero.triggerBoss:
+            enemies.append(Witch(1100, -150, "Witch"))
+            hero.triggerBoss = False
+
         if up:
             antihold = True
 
@@ -195,9 +198,9 @@ def main():
 
         screen.blit(healthbar.image, healthbar.rect)
 
-        pygame.display.flip()
+        display.flip()
 
-    pygame.quit()
+    quit()
 
 main_menu(screen)
 

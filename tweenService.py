@@ -13,31 +13,47 @@ def lerp(times, points, steps):
         y += dy
 
 class Tween(sprite.Sprite):
-    def __init__(self, target, start, finish, duration):
+    def __init__(self, target, finish, duration):
         self.target = target
-        self.start = start
+        self.start = target.rect
         self.finish = finish
         self.lastFrame = 0
         self.tick = -1000
         self.isFinished = False
         self.duration = duration
-        self.timing = duration * 10
+        self.timing = 10
         self.frames = []
 
+        self.start = target.rect
+        self.frames = []
         x_1, y_1 = self.start.x, self.start.y
         x_2, y_2 = self.finish.x, self.finish.y
-        times = [1, 100]
+        times = [1, int(100 * self.duration)]
         points = [(x_1, y_1), (x_2, y_2)]
         steps = times[1] - times[0] + 1
         for _, x, y in lerp(times, points, steps):
             self.frames.append((x, y))
     
+    def update(self, target):
+        self.start = target.rect
+        self.frames = []
+        x_1, y_1 = self.start.x, self.start.y
+        x_2, y_2 = self.finish.x, self.finish.y
+        times = [1, int(100 * self.duration)]
+        points = [(x_1, y_1), (x_2, y_2)]
+        steps = times[1] - times[0] + 1
+        for _, x, y in lerp(times, points, steps):
+            self.frames.append((x, y))
+
     def play(self):
         self.target.rect.x = self.frames[self.lastFrame][0]
-        self.target.rect.x = self.frames[self.lastFrame][1]
+        self.target.rect.y = self.frames[self.lastFrame][1]
 
         if time.get_ticks() - self.tick > self.timing:
             self.lastFrame += 1
+            self.tick = time.get_ticks()
 
-        if self.lastFrame > 100:
+        try:
+            self.target.rect.x = self.frames[self.lastFrame][0]
+        except Exception:
             self.isFinished = True
