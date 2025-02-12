@@ -86,7 +86,7 @@ def main():
 
     # Main loop
     while running:
-        timer.tick(100)
+        timer.tick(60)
         # Look at every event in the queue
 
         for event in pygame.event.get():
