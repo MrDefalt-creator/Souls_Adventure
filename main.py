@@ -1,10 +1,16 @@
 import pygame
 from pygame import *
 
+
+
 from EndScreen import death_screen, win_screen
 from mainclasses import *
+
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.SCALED, vsync=1)
+
 from menu import *
 from Heal import Items
+from fade import *
 from GUI import GUI
 from Enemy import Enemy
 from witch import Witch
@@ -13,8 +19,18 @@ from InfiniteScrolling import Scroller
 
 from LevelSelector import level_selector_screen
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pygame.SCALED, vsync=1)
 pygame.display.set_caption("The Souls Adventure")
+
+def pause():
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit()
+
+        fadein(screen)
+
+
+        display.flip()
 
 def main():
     # Initialize pygame
@@ -166,7 +182,7 @@ def main():
                 camera.apply(a)
             a.update()
 
-        hero.update(left, right, up, down, platforms, z, c, enemies, walls, Attacks)
+        result = hero.update(left, right, up, down, platforms, z, c, enemies, walls, Attacks)
 
         if hero.triggerBoss:
             enemies.append(Witch(1100, -150, "Witch"))
@@ -205,6 +221,9 @@ def main():
 
         screen.blit(healthbar.image, healthbar.rect)
 
+        if not result:
+            return screen, True
+
         display.flip()
 
     quit()
@@ -213,6 +232,8 @@ main_menu(screen)
 
 while True:
     screen, win = main()
+    Projectiles = []
+    enemies = []
     if win:
         win_screen(screen)
     else:

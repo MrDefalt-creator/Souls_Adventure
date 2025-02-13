@@ -46,14 +46,15 @@ class Tween(sprite.Sprite):
             self.frames.append((x, y))
 
     def play(self):
-        self.target.rect.x = self.frames[self.lastFrame][0]
-        self.target.rect.y = self.frames[self.lastFrame][1]
-
-        if time.get_ticks() - self.tick > self.timing:
-            self.lastFrame += 1
-            self.tick = time.get_ticks()
-
-        try:
+        if not self.isFinished:
             self.target.rect.x = self.frames[self.lastFrame][0]
-        except Exception:
-            self.isFinished = True
+            self.target.rect.y = self.frames[self.lastFrame][1]
+
+            if time.get_ticks() - self.tick > self.timing:
+                self.lastFrame += 1
+                self.tick = time.get_ticks()
+
+            try:
+                self.target.rect.x = self.frames[self.lastFrame][0]
+            except Exception:
+                self.isFinished = True

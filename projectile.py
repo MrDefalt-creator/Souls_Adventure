@@ -13,12 +13,13 @@ class Projectile(sprite.Sprite):
         sprite.Sprite.__init__(self)
         self.rect, self.finish, self.duration, self.pType, self.facing, self.owner = info
         self.tween = Tween(self, self.finish, self.duration)
+        self.active = False
         self.collided = False
         self.destroyed = False
         self.sprite_width = 576
         self.sprite_height = 576
-        self.hitbox_width = 50
-        self.hitbox_height = 100
+        self.hitbox_width = 40
+        self.hitbox_height = 90
 
         self.startPos = Rect(self.rect.x, self.rect.y, self.hitbox_width, self.hitbox_height)
         self.rect = self.startPos 
@@ -33,21 +34,24 @@ class Projectile(sprite.Sprite):
             for anim, params in TYPICAL_ANIMS[self.pType].items():
                 Animation(self, anim, self.pType, direction, params[0], params[1], params[2], self.sprite_width, self.sprite_height, vertical)
 
+        self.image = self.Animations["Right"]["Idle"].actual_frames[0].image.convert_alpha()
+
         Projectiles.append(self)
 
     def update(self, platforms, hero):
-        self.tween.play()
+        if self.active:
+            self.tween.play()
 
-        self.playAnim("Idle")
+            self.playAnim("Idle")
 
-        if self.collided:
-            self.playAnim("Destroy")
-            if not self.Animations[self.facing]["Destroy"].isPlaying:
-                self.destroyed = True
-        
-        self.collide(platforms, hero)
+            if self.collided:
+                self.playAnim("Destroy")
+                if not self.Animations[self.facing]["Destroy"].isPlaying:
+                    self.destroyed = True
 
-        self.image = self.image.convert_alpha()
+            self.collide(platforms, hero)
+
+            self.image = self.image.convert_alpha()
 
     def updateTween(self):
         self.tween = Tween(self, self.finish, self.duration)
@@ -71,8 +75,8 @@ class Projectile(sprite.Sprite):
     def draw(self, screen):
         #draw.rect(screen, (255, 0, 0), self.rect, 3)  # Зеленый контур хитбокса
 
-        sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2
-        sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height) // 2
+        sprite_x = self.rect.x - (self.sprite_width - self.hitbox_width) // 2 + 1
+        sprite_y = self.rect.y - (self.sprite_height - self.hitbox_height) // 2 + 5
 
         #draw.rect(screen, (255,0,0), self.attack.rect, 3)
 

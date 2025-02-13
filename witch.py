@@ -1,3 +1,5 @@
+import time
+
 from pygame import *
 from spritehandler import *
 from animator import *
@@ -21,7 +23,7 @@ class Witch(sprite.Sprite):
         self.attackTick = -1000
         self.inv = False
         self.invTick = -1000
-        self.maxhealth = 30
+        self.maxhealth = 15
         self.health = self.maxhealth
         self.cutscene = True
         self.action = 0
@@ -48,17 +50,19 @@ class Witch(sprite.Sprite):
                 Animation(self, anim, self.charType, direction, params[0], params[1], params[2], self.sprite_width, self.sprite_height)
         
         self.tweens = [
-            Tween(self, Rect(100, 200, 0, 0), 0.5),
-            Tween(self, Rect(584, 60, 0, 0), 0.5),
-            Tween(self, Rect(1100, 60, 0, 0), 0.5),
+            Tween(self, Rect(100, 300, 0, 0), 0.5),
+            Tween(self, Rect(100, 400, 0, 0), 0.5),
+            Tween(self, Rect(1100, 300, 0, 0), 0.5),
             Tween(self, Rect(1100, 400, 0, 0), 0.5)
         ]
 
+        shuffle(self.tweens)
+
         self.spikes = []
 
-        for _ in range(10):
+        for _ in range(5):
             x = randint(20, 1240)
-            self.spikes.append(Projectile((Rect(x, -100, 100, 100), Rect(x, 800, 100, 100), 2, "Ice2", "Right", self)))
+            self.spikes.append(Projectile((Rect(x, -100, 40, 90), Rect(x, 800, 40, 90), 2, "Ice2", "Right", self)))
         
         self.startTween = Tween(self, Rect(1100, 400, 0, 0), 2)
         
@@ -80,14 +84,23 @@ class Witch(sprite.Sprite):
         self.rect.x += self.xvel
         self.collide(self.xvel, 0, platforms)
 
-        if not self.cutscene:
+        if not self.cutscene and self.health > 0:
             self.do_something()
-            if not self.attackCD and len(Projectiles) < 2:
+            for spike in self.spikes:
+                if not spike.active and not self.attackCD:
+                    spike.active = True
+                    self.attackCD = True
+                    self.attackTick = time.get_ticks()
 
+                if spike.destroyed:
+                    x = randint(20, 1240)
+                    spike.rect = Rect(x, -100, 40, 90)
+                    spike.finish = Rect(x, 800, 40, 90)
+                    spike.updateTween()
+                    spike.active = False
+                    spike.destroyed = False
+                    spike.collided = False
 
-                
-                self.attackCD = True
-                self.attackTick = time.get_ticks()
         else:
             self.startTween.play()
             self.playAnim("Fly")
@@ -100,6 +113,13 @@ class Witch(sprite.Sprite):
             self.playAnim("Take_hit")
             if not self.Animations[self.facing]["Take_hit"].isPlaying:
                 self.isHurt = False
+
+        if not self.isHurt and self.health <= 0:
+            self.playAnim("Death")
+            self.yvel += GRAVITY
+            if not hero.end:
+                hero.end = True
+                hero.endTick = time.get_ticks()
         
         self.image = self.image.convert_alpha()
 
@@ -137,6 +157,9 @@ class Witch(sprite.Sprite):
         #draw.rect(screen, (255,0,0), self.attack.rect, 3)
 
         screen.blit(self.image, (sprite_x, sprite_y))
+
+    def spawnItem(self):
+        ""
 
     def resetTweens(self, exception):
         for t in self.tweens:

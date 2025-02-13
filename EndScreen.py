@@ -98,9 +98,17 @@ def win_screen(screen):
         screen.blit(bg2, (0, 0))  # Второй слой фона
         screen.blit(bg3, (0, 0))  # Третий слой фона
 
-# Заголовок чуть выше
+        # Заголовок чуть выше
         draw_text("Вы победили!", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 200, HIGHLIGHT, screen)
-        draw_text("Спасибо за игру!", SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 80, HIGHLIGHT, screen)
+
+        # Кнопка "Попробовать снова" ближе к центру
+        retry_button = draw_text(
+            "В выбор уровня",
+            SCREEN_WIDTH // 2,
+            SCREEN_HEIGHT // 2 - 80,
+            WHITE if SCREEN_WIDTH // 3 < mx < SCREEN_WIDTH * 2 / 3 and SCREEN_HEIGHT // 2 - 105 < my < SCREEN_HEIGHT // 2 - 55 else HIGHLIGHT,
+            screen
+        )
 
         # Кнопка "Выход" ещё ниже
         exit_button = draw_text(
@@ -116,6 +124,8 @@ def win_screen(screen):
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if retry_button.collidepoint(mx, my):
+                    return  # Запуск игры
                 if exit_button.collidepoint(mx, my):
                     pygame.quit()
                     sys.exit()

@@ -15,6 +15,8 @@ directions = {
 
 enemies = []
 
+fadeImage = image.load("Assets/UI/Fade.png")
+
 cantCollide = ["-", "e", "^", "*", "#", "!", ":", ";", "?"]
 
 destructable = ["q", "a", "z"]
@@ -47,7 +49,8 @@ TYPICAL_ANIMS = {
         "Idle": (1,0,170),
         "Walk": (1,0,100),
         "Take_hit": (0,0,100),
-        "Fly": (1,0,170)
+        "Fly": (1,0,170),
+        "Death": (0,1,100)
     },
     "Ice": {
         "Spawn": (0,0,100),
@@ -124,6 +127,8 @@ class Player(sprite.Sprite):
         self.isDamaging = False
         self.onGround = False
         self.onWall = False
+        self.end = False
+        self.endTick = 0
         self.parryTick = -1000
         self.hurtTick = -1000
         self.invTick = -4000
@@ -345,6 +350,11 @@ class Player(sprite.Sprite):
         self.checkDamage(enemies, platforms)
         self.checkItems()
         self.image = self.image.convert_alpha()
+
+        if self.end:
+            if time.get_ticks() - self.endTick > 2000:
+                return False
+        return True
 
     def playAnim(self, name):
         frame = self.Animations[self.facing][name].play()
