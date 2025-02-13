@@ -52,6 +52,11 @@ TYPICAL_ANIMS = {
     "Ice": {
         "Spawn": (0,0,100),
         "Idle": (1,0,100),
+        "Destroy": (0,0,100),
+    },
+    "Ice2": {
+        "Spawn": (0,0,100),
+        "Idle": (1,0,100),
         "Destroy": (0,0,100)
     }
 }
@@ -301,7 +306,7 @@ class Player(sprite.Sprite):
             self.isAttacking = True
             self.xvel = 0
 
-        if self.isAttacking:
+        if self.isAttacking and self.attackCount > 0:
             self.playAnim(f"Attack{self.attackCount}")
             if not self.Animations[self.facing][f"Attack{self.attackCount}"].isPlaying:
                 self.isAttacking = False
@@ -339,6 +344,7 @@ class Player(sprite.Sprite):
 
         self.checkDamage(enemies, platforms)
         self.checkItems()
+        self.image = self.image.convert_alpha()
 
     def playAnim(self, name):
         frame = self.Animations[self.facing][name].play()
@@ -491,6 +497,7 @@ class Attack(sprite.Sprite):
     def __init__(self, x, y, width, height):
         self.rect = Rect(x, y, width, height)
         self.tick = time.get_ticks()
+        self.isReflectable = False
         self.reflected = False
         Attacks.append(self)
         
@@ -511,4 +518,5 @@ class Platform(sprite.Sprite):
         self.image = transform.scale(get_sprite(tile_sheet, tiles[tile][0], tiles[tile][1], sprite_params["Tile"][0], sprite_params["Tile"][1]),
                                      (PLATFORM_WIDTH, PLATFORM_HEIGHT))
         self.image.set_colorkey((0, 0, 0))
+        self.image = self.image.convert_alpha()
         self.rect = Rect(x, y, PLATFORM_WIDTH, PLATFORM_HEIGHT) if tile not in walls else Rect(x, 0, PLATFORM_WIDTH, 720)

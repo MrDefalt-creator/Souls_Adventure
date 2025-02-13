@@ -6,7 +6,8 @@ sheets = {
     "Warrior": image.load("Assets/Warrior/adventurer-sheet2.png"),
     "Skeleton": image.load("Assets/Skeleton/sprite-sheet.png"),
     "Witch": image.load("Assets/Witch/witch-sheet.png"),
-    "Ice": image.load("Assets/IceVFX1/ice-sheet.png")
+    "Ice": image.load("Assets/IceVFX1/ice-sheet.png"),
+    "Ice2": image.load("Assets/IceVFX1/ice-sheet2.png")
 }
 
 sprite_params = {
@@ -15,7 +16,8 @@ sprite_params = {
     "Health": (64, 16),
     "Skeleton":(150,150),
     "Witch": (32, 48),
-    "Ice": (192, 192)
+    "Ice": (192, 192),
+    "Ice2": (576, 576)
 }
 
 tiles = {
@@ -54,8 +56,8 @@ health = [[0,0],[0,1],[0,2],[0,3],[0,4]]
 
 placeholder = [0,0]
 
-def get_sprite(sprite_sheet, x, y, sprite_width, sprite_height, flipped = False):
+def get_sprite(sprite_sheet, x, y, sprite_width, sprite_height, flipped = False, vertical = False):
     sprite_rect = Rect(x * sprite_width, y * sprite_height, sprite_width, sprite_height)
-    sprite_image = Surface(sprite_rect.size)
+    sprite_image = Surface(sprite_rect.size).convert_alpha()
     sprite_image.blit(sprite_sheet, (0, 0), sprite_rect)
-    return transform.flip(sprite_image, True, False) if flipped else sprite_image        
+    return transform.flip(sprite_image, flipped, vertical)

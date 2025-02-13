@@ -90,6 +90,8 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x += self.xvel
         self.collide(self.xvel, 0, platforms)
 
+        self.image = self.image.convert_alpha()
+
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
             if sprite.collide_rect(self, p):

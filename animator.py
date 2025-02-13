@@ -29,7 +29,7 @@ AnimFrames = {
     "Skeleton": {
         "Idle": [(0, 0), (1, 0), (2, 0), (3, 0)],
         "Walk": [(0, 1), (1, 1), (2, 1), (3, 1)],
-        "Take_hit": [(0, 2), (1, 2), (2, 2), (3, 2)],
+        "Take_hit": [(1, 2), (1, 2)],
         "Death": [(0, 3), (1, 3), (2, 3), (3, 3)],
         "Attack": [(0, 5), (0, 5), (1, 5), (1, 5), (2, 5), (3, 5), (0, 4), (1, 4), [2, 4, "isDamaging", True], (3, 4), (3, 4)]
     },
@@ -37,14 +37,20 @@ AnimFrames = {
     "Witch": {
         "Idle": [(1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5)],
         "Walk": [(0, 0), (0, 1), (0, 2), (0, 3), (0, 4), (0, 5), (0, 6), (0, 7)],
-        "Take_hit": [(3, 0), (3, 1), (3, 2)],
+        "Take_hit": [(3, 1), (3, 1)],
         "Fly": [(2, 0), (2, 1), (2, 2), (2, 3), (2, 4)]
     },
 
     "Ice": {
         "Spawn": [(0, 0), (1, 0), (2, 0)],
-        "Idle": [(0, 1), (1, 1), (2, 1), (3, 1), (4, 1), (0, 2), (1, 2), (2, 2)],
+        "Idle": [(3, 0), (4, 0), (0, 1), (1, 1), (2, 1), (3, 1), (4, 1), (0, 2), (1, 2), (2, 2)],
         "Destroy": [(3, 2), (4, 2), (0, 3), (1, 3), (2, 3), (3, 3), (4, 3)]
+    },
+
+    "Ice2": {
+        "Spawn": [(3, 0), (3, 1), (3, 2)],
+        "Idle": [(3, 3), (3, 4), (2, 0), (2, 1), (2, 2), (2, 3), (2, 4), (1, 0), (1, 1), (1, 2)],
+        "Destroy": [(1, 3), (1, 4), (0, 0), (0, 1), (0, 2), (0, 3), (0, 4)]
     }
 }
 
@@ -52,7 +58,7 @@ def getOppositeDirection(string):
     return "Right" if string == "Left" else "Left"
 
 class Animation(sprite.Sprite):
-    def __init__(self, target, animName, charType, facing, isLooped, doesLinger, frameTime, scalex=150, scaley=110):
+    def __init__(self, target, animName, charType, facing, isLooped, doesLinger, frameTime, scalex=150, scaley=110, vertical=False):
         self.isPlaying = False
         self.animName = animName
         self.charType = charType
@@ -71,9 +77,9 @@ class Animation(sprite.Sprite):
 
         for frame in Anim:
             if type(frame) == list:
-                newframe = namespace(image = transform.scale(get_sprite(sheets[charType], frame[0], frame[1], sprite_params[charType][0], sprite_params[charType][1], flipped), (scalex, scaley)), event = animEvent(frame[2], frame[3]))
+                newframe = namespace(image = transform.scale(get_sprite(sheets[charType], frame[0], frame[1], sprite_params[charType][0], sprite_params[charType][1], flipped, vertical), (scalex, scaley)), event = animEvent(frame[2], frame[3]))
             else:
-                newframe = namespace(image = transform.scale(get_sprite(sheets[charType], frame[0], frame[1], sprite_params[charType][0], sprite_params[charType][1], flipped), (scalex, scaley)), event = None)
+                newframe = namespace(image = transform.scale(get_sprite(sheets[charType], frame[0], frame[1], sprite_params[charType][0], sprite_params[charType][1], flipped, vertical), (scalex, scaley)), event = None)
             newframe.image.set_colorkey((0, 0, 0))
             self.actual_frames.append(newframe)
         

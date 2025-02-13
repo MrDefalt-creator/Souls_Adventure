@@ -8,6 +8,7 @@ from Heal import Items
 from GUI import GUI
 from Enemy import Enemy
 from witch import Witch
+from projectile import Projectiles
 from InfiniteScrolling import Scroller
 
 from LevelSelector import level_selector_screen
@@ -195,6 +196,12 @@ def main():
                 camera.apply(e)
             if e.isVisible:
                 screen.blit(e.image, e.rect)
+
+        for pr in Projectiles:
+            if hero.isFollowed:
+                camera.apply(pr)
+            pr.update(platforms, hero)
+            pr.draw(screen)
 
         screen.blit(healthbar.image, healthbar.rect)
 

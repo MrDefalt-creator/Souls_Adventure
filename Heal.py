@@ -9,6 +9,7 @@ class Heal(sprite.Sprite):
         self.used = False
         self.rect = Rect(self.object.rect.x, self.object.rect.y + 20, 50, 50)
         self.image = transform.scale(image.load("Assets/UI/Heal.png"), (50, 50))
+        self.image = self.image.convert_alpha()
         Items.append(self)
 
     def update(self):

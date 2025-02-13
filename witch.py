@@ -5,6 +5,7 @@ from random import *
 from types import SimpleNamespace as namespace
 from mainclasses import *
 from tweenService import Tween
+from projectile import *
 
 class Witch(sprite.Sprite):
     def __init__(self, x, y, charType):
@@ -16,6 +17,8 @@ class Witch(sprite.Sprite):
         self.isAttacking = False
         self.isDamaging = False
         self.hurtTick = -1000
+        self.attackCD = False
+        self.attackTick = -1000
         self.inv = False
         self.invTick = -1000
         self.maxhealth = 30
@@ -50,6 +53,12 @@ class Witch(sprite.Sprite):
             Tween(self, Rect(1100, 60, 0, 0), 0.5),
             Tween(self, Rect(1100, 400, 0, 0), 0.5)
         ]
+
+        self.spikes = []
+
+        for _ in range(10):
+            x = randint(20, 1240)
+            self.spikes.append(Projectile((Rect(x, -100, 100, 100), Rect(x, 800, 100, 100), 2, "Ice2", "Right", self)))
         
         self.startTween = Tween(self, Rect(1100, 400, 0, 0), 2)
         
@@ -58,6 +67,9 @@ class Witch(sprite.Sprite):
 
         if time.get_ticks() - self.invTick > 200:
             self.inv = False
+
+        if time.get_ticks() - self.attackTick > 500:
+            self.attackCD = False
 
         if not self.onGround:
             self.yvel += GRAVITY
@@ -70,6 +82,12 @@ class Witch(sprite.Sprite):
 
         if not self.cutscene:
             self.do_something()
+            if not self.attackCD and len(Projectiles) < 2:
+
+
+                
+                self.attackCD = True
+                self.attackTick = time.get_ticks()
         else:
             self.startTween.play()
             self.playAnim("Fly")
@@ -77,6 +95,13 @@ class Witch(sprite.Sprite):
                 self.cutscene = False
                 self.tick = time.get_ticks()
                 self.tweens[0].update(self)
+
+        if self.isHurt:
+            self.playAnim("Take_hit")
+            if not self.Animations[self.facing]["Take_hit"].isPlaying:
+                self.isHurt = False
+        
+        self.image = self.image.convert_alpha()
 
 
     def collide(self, xvel, yvel, platforms):
@@ -133,9 +158,12 @@ class Witch(sprite.Sprite):
 
         number = self.action
         self.resetTweens(self.tweens[number])
+        self.facing = "Left" if self.rect.x > 640 else "Right" # Всегда смотреть в сторону центра экрана
+
         if not self.tweens[number].isFinished:
             self.tweens[number].play()
-        self.facing = "Left" if self.rect.x > 640 else "Right" # Всегда смотреть в сторону центра экрана
+        else:
+            self.isAttacking = True
 
         match number:
             case 0:
